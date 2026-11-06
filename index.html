@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>追星小屋🏠</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@400;700&display=swap">
+<style>
+@font-face {
+  font-family: 'ChenYuluoyan';
+  src: url('https://cdn.jsdelivr.net/gh/BBR-Studio/ChenYuluoyan-Thin@main/ChenYuluoyan-Thin.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* 少女感柔和淡藍（Baby Blue）手帳色系 */
+  --bg: #eef6fb;
+  --paper: #fcfdff;
+  --ink: #3f4c57;
+  --soft: #7c8e9c;
+  --blue-main: #8ec5ea;
+  --blue-hover: #7bbce6;
+  --blue-light: #d8edf9;
+  --blue-milk: #eaf5fc;
+  --accent-pink: #fde6ec;
+  --accent-pink-text: #b6526e;
+  --purple-soft: #f2eaff;
+  --yellow-soft: #fff7d6;
+  --wood: #cfbcad;
+  --line: #d8e5ee;
+  --warnbg: #ffebeb;
+  --warn: #e06d64;
+  --danger: #d93847;
+  --ok: #5fa887;
+  --tape-color: #a3d4f1;
+  --tape-color-alt: #fcd5df;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c262e;
+    --paper: #24323c;
+    --ink: #eaf1f7;
+    --soft: #9cb1c2;
+    --blue-main: #4a88b5;
+    --blue-hover: #5d98c2;
+    --blue-light: #2d4557;
+    --blue-milk: #223544;
+    --accent-pink: #442a34;
+    --accent-pink-text: #f59eb5;
+    --purple-soft: #322542;
+    --yellow-soft: #3d3623;
+    --wood: #856a59;
+    --line: #374b5a;
+    --warnbg: #4a2727;
+    --warn: #f28b82;
+    --danger: #ff6b7d;
+    --ok: #80c4a0;
+    --tape-color: #3f6f8f;
+    --tape-color-alt: #824f5e;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "ChenYuluoyan", "沉魚落雁體", "ChenYuluoyan-Thin", "Klee One", "Zen Maru Gothic", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.6;
+}
+
+.app { display: flex; max-width: 1120px; margin: 0 auto; min-height: 100vh; }
+
+nav {
+  width: 180px;
+  padding: 18px 10px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: width .2s;
+}
+nav.min { width: 68px; }
+nav.min .lb, nav.min h1 .lb { display: none; }
+nav h1 {
+  font-size: 19px;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  color: #35729c;
+  white-space: nowrap;
+}
+nav button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 16px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s;
+}
+nav button:hover { background: var(--blue-milk); }
+nav button.on {
+  background: var(--paper);
+  box-shadow: 0 3px 0 var(--blue-main);
+  font-weight: 700;
+  color: #2b6c96;
+}
+nav button span { margin-right: 6px; }
+nav.min button { text-align: center; }
+nav.min button span { margin: 0; }
+#tg {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 2px 8px;
+  cursor: pointer;
+  color: var(--soft);
+}
+
+main { flex: 1; padding: 20px 18px; min-width: 0; }
+
+.card {
+  background: var(--paper);
+  border: 2px dashed var(--line);
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(180, 205, 225, 0.15);
+}
+.card h2 { margin: 0 0 10px; font-size: 20px; display: flex; align-items: center; gap: 6px; }
+.tape {
+  position: absolute;
+  top: -11px;
+  left: 26px;
+  width: 76px;
+  height: 20px;
+  background: var(--tape-color);
+  opacity: .85;
+  transform: rotate(-3deg);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.tape.right {
+  left: auto;
+  right: 26px;
+  transform: rotate(3deg);
+  background: var(--tape-color-alt);
+}
+
+.big { font-size: 36px; font-weight: 700; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 11px;
+  border-radius: 99px;
+  font-size: 13px;
+  background: var(--blue-light);
+  color: #245e85;
+}
+.normal .big { color: var(--ok); }
+.warning { background: var(--warnbg); }
+.warning .big { color: var(--warn); }
+.danger { border: 2px solid var(--danger); }
+.danger .big { color: var(--danger); font-weight: 900; }
+.danger .badge { background: var(--danger); color: #fff; font-weight: 700; }
+
+.bar { height: 11px; background: var(--blue-milk); border-radius: 9px; overflow: hidden; margin: 9px 0; }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, #b6e0fb, #8ec5ea); border-radius: 9px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 8px;
+  border-bottom: 1px dotted var(--line);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background .15s;
+}
+.row:hover { background: var(--blue-milk); }
+.row:last-child { border: 0; }
+
+.cover {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: var(--blue-light);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  flex: none;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.cover img { width: 100%; height: 100%; object-fit: cover; }
+.grow { flex: 1; min-width: 0; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.pill, .tabs button {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  padding: 6px 16px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tabs button.on {
+  background: var(--blue-main);
+  border-color: var(--blue-main);
+  color: #173b52;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(142, 197, 234, 0.4);
+}
+.flag { color: var(--warn); font-size: 14px; margin-top: 6px; }
+
+input, textarea, select {
+  font: inherit;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  width: 100%;
+}
+label { display: block; font-size: 14px; color: var(--soft); margin-top: 9px; }
+
+.btn {
+  background: var(--blue-main);
+  border: 0;
+  border-radius: 14px;
+  padding: 8px 20px;
+  font: inherit;
+  color: #173b52;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(142, 197, 234, 0.4);
+  transition: transform .1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn.g { background: transparent; border: 1px solid var(--line); color: var(--ink); box-shadow: none; }
+.btn.d { background: var(--danger); color: #fff; }
+
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(35, 50, 65, .45);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 12px;
+  overflow: auto;
+  z-index: 20;
+}
+#modal .card { max-width: 560px; width: 100%; margin: auto; border-style: solid; }
+.acts { display: flex; gap: 9px; margin-top: 15px; flex-wrap: wrap; }
+.lk { cursor: pointer; transition: transform .15s; }
+.lk:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(180, 210, 235, 0.3); }
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px dotted var(--line);
+}
+.kv:last-child { border: 0; }
+.ok { color: var(--ok); font-weight: 700; }
+.no { color: var(--danger); font-weight: 900; }
+
+/* 首頁獨立預算橫排小列 */
+.budget-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: -6px 0 18px;
+  background: rgba(234, 245, 252, 0.7);
+  border: 1px dashed #bcdbf0;
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--soft);
+}
+.budget-strip span { display: inline-flex; align-items: center; gap: 4px; }
+.budget-strip b { color: #2b6c96; font-weight: 700; }
+
+/* 互相自動串聯連結元件 */
+.cross-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--blue-light);
+  color: #1e5275;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 4px;
+  border: 1px dashed #a5cde8;
+}
+.cross-link:hover { background: #cce7f7; }
+
+.img-preview {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin: 10px 0;
+  border: 2px dashed #b8daf2;
+  background: var(--blue-milk);
+}
+
+/* 明細分類小標題與統計盒 */
+.sub-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+.sub-stat-box {
+  background: var(--blue-milk);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.sub-stat-box.pink {
+  background: var(--accent-pink);
+}
+.sec-head {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2b6c96;
+  background: var(--blue-milk);
+  padding: 5px 12px;
+  border-radius: 10px;
+  margin: 12px 0 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sec-head.pink {
+  background: var(--accent-pink);
+  color: var(--accent-pink-text);
+}
+
+/* 跨年預存提示與日期測試小列 */
+.next-yr-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1.5px dashed #e5a9bc;
+  border-radius: 16px;
+}
+.sim-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  background: var(--blue-milk);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--soft);
+}
+.sim-bar button {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  cursor: pointer;
+}
+.sim-bar button.on {
+  background: var(--blue-main);
+  border-color: var(--blue-main);
+  color: #173b52;
+  font-weight: 700;
+}
+
+@media(max-width: 700px) {
+  .app { display: block; padding-bottom: 78px; }
+  nav, nav.min {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    flex-direction: row;
+    background: var(--paper);
+    border-top: 2px dashed var(--line);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    z-index: 5;
+    justify-content: space-around;
+  }
+  nav h1 { display: none; }
+  nav button, nav.min button { text-align: center; padding: 4px 6px; font-size: 12px; }
+  nav .lb, nav.min .lb { display: inline !important; }
+  nav button span { display: block; margin: 0; font-size: 20px; }
+  .budget-strip { justify-content: space-around; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="card" id="mbox"></div></div>
+
+<script>
+// Google Apps Script (GAS) Web App 雲端回寫端點與雲端硬碟圖片上傳端點 (部署GAS後貼於此處即可全自動同步與上傳圖片)
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby0FvTYny-xWjFVoVmuzE18tOA9yui-DWpUnR77CKrWFg99yyRGhpe0oF9YqI-6FIvZ/exec';
+
+function resolveDriveImg(pathOrUrl) {
+  if (!pathOrUrl) return '';
+  const s = String(pathOrUrl).trim();
+  const m = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || s.match(/id=([a-zA-Z0-9_-]+)/) || s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800`;
+  if (/^https?:/.test(s)) return s;
+  return '';
+}
+
+const $ = s => document.querySelector(s);
+
+// 霞海城隍廟月老 1～100 首全籤詩與專屬追星運資料庫
+const POEMS = {"第一籤": {"text": "巍巍獨步向雲間，玉殿千官第一班。富貴榮華天付汝，福如東海壽如山。", "sum": "大吉。追星運非常旺，有機會抽中高價值福利、獲得親簽、搶到理想位置或遇到難得的近距離互動，努力容易得到回報。"}, "第二籤": {"text": "盈虛消息總天時，自此君當百事宜。若問前程歸縮地，更須方寸好修為。", "sum": "吉。追星機會逐漸好轉，過去不順的抽選或活動可能迎來轉機。保持理性、做好準備，更容易把握好機會。"}, "第三籤": {"text": "衣食自然生處有，勸君不用苦勞心。但能孝悌存忠信，福祿來成禍不侵。", "sum": "平吉。追星適合量力而為，不必過度焦慮或勉強花錢。即使沒有抽中福利，也能從日常支持、收藏與同好交流中獲得滿足。"}, "第四籤": {"text": "去年百事頗相宜，若較今年時運衰。好把瓣香告神佛，莫教福謝悔無追。", "sum": "偏凶。近期追星運可能不如過去順利，抽選、搶票或活動未必如願。避免因不甘心而不斷追加預算，增加自己的壓力。"}, "第五籤": {"text": "子有三般不自由，門庭蕭索冷如秋。若逢牛鼠交承日，萬事回春不用憂。", "sum": "先凶後吉。近期可能遇到活動限制、抽選落空或時間無法配合等阻礙，但低潮不會持續太久，之後仍有重新參與活動、獲得福利的機會。"}, "第六籤": {"text": "何勞鼓瑟更吹笙，寸步如登萬里程。彼此懷疑不相信，休將私意憶濃情。", "sum": "偏凶。追星過程容易遇到溝通不良、資訊不透明或彼此猜疑。尤其是交易、代購與合作事項，不要只憑口頭承諾行動。"}, "第七籤": {"text": "仙風道骨本天生，又遇仙宗為主盟。指日丹成謝巖谷，一朝引領向天行。", "sum": "大吉。容易遇到難得的追星機會，例如意外抽中福利、獲得特別待遇，或在原本不抱期待的活動中有好收穫。"}, "第八籤": {"text": "年來耕稼苦無收，今年田疇定有秋。況遇太平無事日，士農工商百無憂。", "sum": "吉。過去的投入逐漸有機會得到回報，抽選、收藏特典或活動參與都可能比之前順利，適合耐心累積。"}, "第九籤": {"text": "望渠消息向長安，常把菱花仔細看。見說文書將入境，今朝喜色上眉端。", "sum": "吉。好消息運佳，可能收到中選通知、活動公告、出貨消息或期待已久的福利結果，記得留意官方通知與信件。"}, "第十籤": {"text": "病患時時命蹇衰，何須打瓦共鑽龜。直教重見一陽復，始可求神仗佛持。", "sum": "偏凶。追星過程容易反覆不順，例如抽選失利、活動延期或行程受阻。不適合一直花錢挽回結果，先休息、等待下一次機會較好。"}, "第十一籤": {"text": "今年好事一番新，富貴榮華萃汝身。誰道機關難料處，到頭獨立轉傷神。", "sum": "吉中帶慎。可能迎來新的活動或福利機會，但過程未必完全如預期，也可能需要自行承擔額外成本。記得留意預算與活動規則。"}, "第十二籤": {"text": "營為期望在春前，誰料秋來又不然。直遇清江貴公子，一生活計始安全。", "sum": "先失望後有轉機。原本期待的抽選或活動可能延遲，甚至不如預期，但後續可能透過朋友協助、代購或新活動機會獲得意外收穫。"}, "第十三籤": {"text": "君今庚甲未亨通，且向江頭作釣翁。玉兔重生應發跡，萬人頭上逞英雄。", "sum": "先平後吉。目前可能還不是容易中選或搶到好位置的時機，適合先累積經驗、熟悉活動規則，之後有機會在福利活動中脫穎而出。"}, "第十四籤": {"text": "一見佳人便喜歡，誰知去後有多般。人情冷暖君休訝，歷涉應知行路難。", "sum": "偏凶。原本期待的活動或偶像互動，實際體驗可能不如想像。同時要留意同好間的人情變化，不要因一時熱絡就過度信任他人。"}, "第十五籤": {"text": "兩家門戶各相當，不是姻緣莫較量。直待春風好消息，卻調琴瑟向蘭房。", "sum": "平吉。追星機會重在適不適合自己，不必和別人比較福利或互動成果。選擇喜歡且適合自己的活動，自然能獲得滿足，近期也可能有好消息。"}, "第十六籤": {"text": "官事悠悠難辨明，不如息了且歸耕。傍人煽惑君休信，此事當謀親弟兄。", "sum": "偏凶。容易遇到活動爭議、交易糾紛、讓票問題或網路謠言。不要輕信陌生人的說法，也避免捲入粉絲爭執，有疑問應先確認資訊。"}, "第十七籤": {"text": "田園價貫好商量，事到公庭彼此傷。縱使機關圖得勝，定為後世子孫殃。", "sum": "凶。特別要留意代購、團購、周邊轉讓及抽選名額等金錢糾紛。即使爭取到想要的結果，也可能付出額外成本或影響人際關係。"}, "第十八籤": {"text": "知君指擬是空華，底事茫茫未有涯。牢把腳根踏實地，善為善應永無差。", "sum": "平。不要將追星計畫建立在不確定的消息或過高期待上。抽選、搶票與福利都應以實際規則為準，做好準備才能避免失望與浪費。"}, "第十九籤": {"text": "嗟子從來未得時，今年星運頗相宜。營求動作都如意，和合婚姻誕貴兒。", "sum": "大吉。過去不理想的追星運有望好轉，抽選、購買與活動報名都可能比預期順利，也容易得到朋友或同好的幫助，適合把握機會。"}, "第二十籤": {"text": "一生心事向誰論，十八灘頭說與君。世事盡從流水去，功名富貴等浮雲。", "sum": "平偏凶。可能對追星投入的時間、金錢或情感感到疲憊。不要把中選或互動結果當成追星價值的唯一標準，適時放下執著會更自在。"}, "第二十一籤": {"text": "與君夙昔結成冤，今日相逢那得緣。好把經文多諷誦，祈求戶內保嬋娟。", "sum": "偏凶。可能遇到不合時機的活動，或抽選、互動結果不如預期。也要留意同好間的摩擦，避免因比較、嫉妒或誤會影響心情。"}, "第二十二籤": {"text": "碧玉池中開白蓮，莊嚴色相自天然。生來骨格超凡俗，正是人間第一仙。", "sum": "大吉。容易有令人驚豔的追星體驗，例如遇到喜歡的舞台、獲得漂亮特典或抽中難得福利，也能從喜歡的偶像與作品中獲得精神滿足。"}, "第二十三籤": {"text": "花開花謝在春風，貴賤窮通百歲中。羨子榮華今已矣，到頭萬事總成空。", "sum": "偏凶。追星熱度、活動機會與福利可能有所起伏，曾經珍貴的收藏或體驗也可能逐漸失去新鮮感。別過度追求稀有度，享受當下更重要。"}, "第二十四籤": {"text": "一春萬事苦憂煎，夏裏營求始帖然。更遇秋成冬至後，恰如騎鶴與腰纏。", "sum": "先苦後大吉。前期可能遇到抽選不順、活動安排不理想或花費壓力，但之後有機會逐漸改善，甚至獲得超出預期的收穫，適合耐心等待。"}, "第二十五籤": {"text": "寅午戌年多阻滯，亥子丑月漸亨嘉。更逢玉兔金雞會，枯木逢春自放花。", "sum": "先凶後吉。追星運勢起伏較大，部分時期可能參與什麼都不順，但之後會逐漸出現轉機，仍有抽中福利、參加活動或獲得特典的機會。"}, "第二十六籤": {"text": "年來豐歉皆天數，自是今年旱較多。與子定期三日內，田疇霑足雨滂沱。", "sum": "先凶後吉。近期抽選運可能不佳，期待的福利也遲遲沒有結果，但轉機可能很快出現，原本以為沒希望的事情也可能突然傳來好消息。"}, "第二十七籤": {"text": "世間萬物各有主，一粒一毫君莫取。英雄豪傑自天生，也須步步循規矩。", "sum": "平偏慎。追星時要遵守活動規則、尊重他人權益，不要為了福利使用不正當方式取得資格或名額，以免得不償失。"}, "第二十八籤": {"text": "公侯將相本無種，好把勤勞契上天。人事盡從天理見，才高豈得困林泉。", "sum": "吉。事前準備能帶來不錯的追星成果，熟悉抽選方式、報名資訊與購票流程，有助於提高成功機會，不必因過去失敗而否定自己。"}, "第二十九籤": {"text": "祖宗積德幾多年，源遠流長慶自然。若更操修無倦已，天須還汝舊青氈。", "sum": "吉。過去累積的經驗與人際關係將成為助力，飯友情報、可靠代購或活動經驗都可能帶來好收穫，保持良好互動更容易獲得回報。"}, "第三十籤": {"text": "奉公謹守莫欺心，自有亨通吉利臨。目下營求且休矣，秋期與子定佳音。", "sum": "先平後吉。目前未必是抽選、購物或參加活動的最佳時機，不必急著投入太多資源。之後可能有更適合的機會，耐心等待更好。"}, "第三十一籤": {"text": "秋冬作事只尋常，春到門庭漸吉昌。千里信音符遠望，萱堂快樂未渠央。", "sum": "先平後吉。追星機會將逐漸增加，尤其是遠距離、海外或線上活動，可能收到期待已久的通知，過去錯過的活動也有機會再次參與。"}, "第三十二籤": {"text": "勞心汨汨竟何歸，疾病兼多是與非。事到頭來渾似夢，何如休要用心機。", "sum": "凶。容易因追星過度耗費心力，遇到抽選落空、購物糾紛或粉絲圈爭議。應適時停下腳步，避免讓追星成為壓力來源。"}, "第三十三籤": {"text": "不分南北與西東，眼底昏昏耳似聾。熟讀黃庭經一卷，不論貴賤與窮通。", "sum": "平。追星資訊可能混亂，容易聽到不同說法而無所適從。建議以官方公告為準，不受網路傳聞與比較影響，也不必執著於福利多寡。"}, "第三十四籤": {"text": "春夏纔過秋又冬，紛紛謀慮攪心胸。貴人垂手來相援，休把私心情意濃。", "sum": "吉中帶慎。追星過程雖可能一度不順，但容易遇到願意幫忙的飯友或同好。接受協助時也要保持適當界線，避免產生過度期待。"}, "第三十五籤": {"text": "一山如畫對清江，門裏團圓事事雙。誰料半途分折去，空幃無語對銀缸。", "sum": "偏凶。原本計畫好的行程可能臨時變動，例如朋友無法同行、活動取消或住宿安排出問題。共同購買與出遊最好事先準備備案。"}, "第三十六籤": {"text": "功名富貴自能為，偶著仙鞭莫問伊。萬里鵬程君有分，吳山頂上好鑽龜。", "sum": "大吉。追星運勢向上，有機會遇到值得把握的活動、抽選或海外機會。只要做好準備，不必因為難度高就放棄嘗試。"}, "第三十七籤": {"text": "焚香來告復何辭，善惡平分汝自知。屏卻昧公心裏事，出門無礙是通時。", "sum": "吉中帶警惕。只要按照正當方式參與活動，整體追星過程大致順利。但要避免不透明交易與違規取得福利，保持誠實才能安心享受追星。"}, "第三十八籤": {"text": "蛩吟唧唧守孤幃，千里懸懸望信歸。等得榮華公子到，秋冬括括雨靡靡。", "sum": "先等待後有消息。近期可能遲遲等不到抽選結果、活動通知或商品消息，但等待之後仍有機會獲得回覆與收穫，海外活動尤其需要耐心。"}, "第三十九籤": {"text": "北山門外好安居，若問終時慎厥初。堪笑包藏許多事，鱗鴻雖便莫修書。", "sum": "平偏慎。購買專輯、代購、抽選資格與活動條件都要事先確認，不要只看他人分享就跟著投入，也別輕信沒有明確來源的消息。"}, "第四十籤": {"text": "新來換得好規模，何用隨他步與趨。只聽耳邊消息到，崎嶇歷盡見亨衢。", "sum": "吉。適合嘗試新的追星方式，例如更換抽選管道、調整購買策略或參加不同形式的活動，過去困難的事情可能因此變得順利。"}, "第四十一籤": {"text": "自南自北自東西，欲到天涯誰作梯。遇鼠逢牛三弄笛，好將名姓榜頭題。", "sum": "大吉。遠征與跨地區追星運佳，有機會參加海外活動、異地簽售或特別場次，也有在競爭性福利中脫穎而出的機會。"}, "第四十二籤": {"text": "我曾許汝事和諧，誰料修為汝自乖。但改新圖莫依舊，營謀應得稱心懷。", "sum": "吉。過去慣用的追星方式可能不再適合，不妨更換管道、調整預算或選擇不同活動，改變策略反而更容易得到理想結果。"}, "第四十三籤": {"text": "一紙官書火急催，扁舟速下浪如雷。雖然目下多驚險，保汝平安去復回。", "sum": "吉中帶險。可能遇到臨時公告、快速開賣或突然釋出的福利，過程雖然混亂，最後仍有機會順利完成。若涉及遠征，要特別留意交通與安全。"}, "第四十四籤": {"text": "汝是人中最吉人，誤為誤作損精神。堅牢一念酬香願，富貴榮華萃汝身。", "sum": "大吉。整體追星運勢很好，有機會得到期待已久的福利或活動成果。不要因為太在意結果而反覆猜測，保持平常心更能享受好運。"}, "第四十五籤": {"text": "好將心地力耕耘，彼此山頭總是墳。陰地不如心地好，修為到底卻輸君。", "sum": "平吉。追星的價值不在於特典數量或座位好壞，而在於自己是否真正享受其中。別為了比較而增加消費，保持喜歡的初衷最重要。"}, "第四十六籤": {"text": "君是山中萬戶侯，信知騎馬勝騎牛。今朝馬上看山色，爭似騎牛得自由。", "sum": "平吉。活動選擇雖多，但不一定每個都適合自己。與其追求最高規格的福利，不如選擇能自在參與、真正喜歡的活動。"}, "第四十七籤": {"text": "與君萬語復千言，祗欲平和雪爾冤。訟則終凶君記取，試於清夜把心捫。", "sum": "偏凶。要留意粉絲圈爭執、交易糾紛、讓票與代購問題。即使自己有理，也應理性溝通並保留紀錄，避免因衝動造成更大損失。"}, "第四十八籤": {"text": "登山涉水正天寒，兄弟姻親那得安。幸遇虎頭人一喚，全家遂保汝重歡。", "sum": "先凶後吉。遠征或活動可能遇到交通、住宿及同行安排上的麻煩，但關鍵時刻容易得到他人協助。事先確認集合與聯絡方式會更安心。"}, "第四十九籤": {"text": "彼此家居只一山，如何似隔鬼門關。日月如梭人易老，許多勞碌不如閒。", "sum": "偏平。可能因時間、交通、工作或預算而無法參加想去的活動。不要把自己逼得太緊，錯過一次活動不代表失去所有機會。"}, "第五十籤": {"text": "人說今年勝舊年，也須步多要周旋。一家和氣多生福，萋菲讒言莫聽偏。", "sum": "吉。整體追星機會比過去好，但仍需要充分準備，也可能需要朋友協助。與飯友保持良好關係、互相分享資訊，有助於獲得更多機會。"}, "第五十一籤": {"text": "君今百事且隨緣，水到渠成聽自然。莫嘆年來不如意，喜逢新運稱心田。", "sum": "吉。追星運逐漸好轉，過去抽不到、買不到或錯過的遺憾有機會得到彌補。保持彈性、不必事事強求，反而容易遇到驚喜。"}, "第五十二籤": {"text": "兀坐幽居歎寂寥，孤燈掩映度清宵。萬金忽報秋光好，活計扁舟渡北朝。", "sum": "先平後吉。近期追星生活可能較平淡，但之後有機會突然收到好消息，例如中選通知、親簽福利、限定特典或期待已久的活動公告。"}, "第五十三籤": {"text": "艱難險阻路蹊蹺，南鳥孤飛依北巢。今日貴人曾識面，相逢卻在夏秋交。", "sum": "吉。追星過程雖有阻礙，但容易遇到願意幫忙的人，例如提供資訊、協助搶票或分享抽選經驗的飯友與同好。"}, "第五十四籤": {"text": "萬人叢裏逞英豪，便欲飛騰霄漢高。爭奈承流風未便，青燈黃卷且勤勞。", "sum": "平偏凶。熱門簽售、限定福利或稀有特典競爭激烈，即使努力準備也未必如願。建議累積經驗，不要投入超出預算的成本。"}, "第五十五籤": {"text": "勤耕力作莫蹉跎，衣食隨時安分過。縱使經商收倍利，不如逐歲廩禾多。", "sum": "平吉。適合穩定、長期地投入追星，不必為了稀有福利一次花太多錢。按照預算收藏、參加喜歡的活動，反而更能持續享受樂趣。"}, "第五十六籤": {"text": "心頭理曲強詞遮，直欲欺官行路斜。一旦醜形臨月鏡，身投憲網莫咨嗟。", "sum": "凶。要小心假冒中選、詐騙代購、虛假交易及不實資訊。付款前務必確認對方與交易內容，避免因追求福利而蒙受損失。"}, "第五十七籤": {"text": "事端百出慮雖長，莫聽人言自主張。一著仙機君記取，紛紛鬧裏更思量。", "sum": "平吉。追星資訊容易混亂，不要因為大家都這樣做就跟著行動。應自行確認官方資訊、仔細思考，再決定是否參與。"}, "第五十八籤": {"text": "蘇秦三寸足平生，富貴功名在此行。更好修為陰騭事，前程萬里自通亨。", "sum": "大吉。溝通與互動運佳，適合參加簽售、視訊通話或留言等活動，有機會留下美好回憶，也容易獲得同好的支持。"}, "第五十九籤": {"text": "門衰戶冷苦伶仃，自嘆祈求不一靈。幸有祖宗陰騭在，香煙未斷續螟蛉。", "sum": "偏平。近期追星運可能較低迷，活動機會不多、抽選結果也不理想，但過去累積的經驗與人際關係仍可能帶來幫助。"}, "第六十籤": {"text": "羨君兄弟好名聲，只管謙撝莫自矜。丹詔槐黃相逼近，巍巍科甲兩同登。", "sum": "大吉。人際互助與合作運很好，適合與朋友一起參加活動、交換特典或安排遠征，也可能自己與同行朋友都獲得不錯的福利。"}, "第六十一籤": {"text": "嘯聚山林兇惡儔，善良無事苦煎憂。主人大笑出門去，不用干戈盜賊休。", "sum": "吉。即使追星圈出現爭議或競爭，只要不主動捲入紛爭，原本擔心的事情可能自然平息，活動與購物也能逐漸恢復順利。"}, "第六十二籤": {"text": "百千人面虎狼心，賴汝干戈用力深。得勝回時秋漸老，虎頭城裏喜相尋。", "sum": "先凶後吉。熱門福利與活動競爭激烈，可能需要花費不少心力，但只要謹慎處理交易與他人承諾，最後仍有機會獲得好成果。"}, "第六十三籤": {"text": "曩時敗北且圖南，筋力雖衰尚一堪。欲識生前君大數，前三三與後三三。", "sum": "平吉。即使過去抽選、搶票失利，仍有再次嘗試的機會。不要因為過去的失敗就放棄，但也要衡量體力與財力，避免過度消耗。"}, "第六十四籤": {"text": "吉人相遇本和同，況有持謀天水翁。人力不勞公論協，事成功倍笑談中。", "sum": "大吉。貴人與合作運極佳，容易遇到可靠的飯友或同行夥伴，讓搶票、遠征、交換特典及資訊分享等事情更加順利。"}, "第六十五籤": {"text": "朔風凜凜正窮冬，多羨門庭喜氣濃。更入新春人事後，衷言方得信先容。", "sum": "先平後吉。目前可能還沒有明確好消息，期待的活動或抽選也需要等待，但後續有機會收到正式通知或透過同好獲得有用資訊。"}, "第六十六籤": {"text": "耕耘只可在鄉邦，何用求謀向外方。見說今年新運好，門闌喜氣事雙雙。", "sum": "吉。追星機會可能就在熟悉的管道與活動中，不一定要花大錢遠赴海外。也有雙喜象徵，可能同時迎來好消息或獲得多項福利。"}, "第六十七籤": {"text": "纔發君心天已知，何須問我決狐疑。願子改圖從孝悌，不愁家室不相宜。", "sum": "平吉。先確認自己真正想要的追星體驗，不必因為別人抽中福利就懷疑自己。調整期待與計畫，能找到更適合自己的活動。"}, "第六十八籤": {"text": "南販珍珠北販鹽，年來幾倍貨財添。勸君止此求田舍，心欲多時何日厭。", "sum": "吉中帶警惕。購物與收藏運不錯，有機會買到喜歡的周邊或稀有特典，但要避免貪多，適時停手並守住預算。"}, "第六十九籤": {"text": "捨舟遵路總相宜，慎勿嬉遊逐貴兒。一夜樽前兄與弟，明朝仇敵又相隨。", "sum": "偏凶。要留意同好、同行夥伴與交易對象間的人際摩擦，尤其涉及金錢或特典分配時，務必事先講清楚規則。"}, "第七十籤": {"text": "雷雨風雲各有司，至誠禱告莫生疑。與君定約為霖日，正是蘊隆中伏時。", "sum": "先等待後大吉。追星機會需要等待適當時機，目前可能還沒有理想的活動或福利，但之後有機會迎來好結果，耐心準備即可。"}, "第七十一籤": {"text": "喜鵲簷前報好音，知君千里欲歸心。繡幃重結鴛鴦帶，葉落霜飛寒色侵。", "sum": "吉中帶慎。容易收到海外活動、遠距離福利或期待已久的好消息，但仍要留意交通、住宿與時間安排，避免忽略實際限制。"}, "第七十二籤": {"text": "河渠傍路有高低，可歎長途日已西。縱有榮華好時節，直須猴犬換金雞。", "sum": "偏平。追星計畫可能進展緩慢，想要的福利或活動未必能立即實現。不要勉強趕進度，等待條件成熟再行動較好。"}, "第七十三籤": {"text": "憶昔蘭房分半釵，而今忽把信音乖。痴心指望成連理，到底誰知事不諧。", "sum": "凶。期待的活動、互動或福利可能不如預期，也要留意與同好間的關係，避免因一時失望而做出衝動決定。"}, "第七十四籤": {"text": "崔巍崔魏復崔巍，履險如夷去復來。身似菩提心似鏡，長安一道放春回。", "sum": "大吉。即使追星過程遇到困難，最後仍有機會順利克服，例如原本搶不到票、抽不到福利的活動，可能因轉機而成功參與。"}, "第七十五籤": {"text": "生前結得好緣姻，一笑相逢情自親。相當人物無高下，得意休論富與貧。", "sum": "大吉。追星人際運很好，容易遇到志同道合的朋友，也有機會在活動中結識新飯友，一起參與活動、交換特典，留下美好回憶。"}, "第七十六籤": {"text": "三千法律八千文，此事何如說與君。善惡兩途君自作，一生禍福此中分。", "sum": "平偏慎。活動規則、購買條件與抽選資格都要仔細確認，不要為了取得福利而違反規定，以免引發後續爭議。"}, "第七十七籤": {"text": "木有根荄水有源，君當自此究其原。莫隨道路人閒話，訟到終凶是至言。", "sum": "平偏慎。容易遇到真假難辨的追星消息，例如抽選攻略、代購資訊或活動傳聞。應確認消息來源，不要輕易加入網路爭論。"}, "第七十八籤": {"text": "家道豊腴自飽溫，也須肚裏立乾坤。財多害己君當省，福有胚胎禍有門。", "sum": "吉中帶警惕。購物與收藏運不錯，有機會得到喜歡的周邊或特典，但要小心為了湊抽選資格而過度消費，記得守住預算。"}, "第七十九籤": {"text": "乾亥來龍仔細看，坎居午向自當安。若移丑艮陰陽逆，門戶凋零家道難。", "sum": "平偏慎。海外遠征、住宿、交通、代購及活動報名都需要仔細安排。不要因為一時心急而忽略細節，以免後續衍生麻煩。"}, "第八十籤": {"text": "一朝無事忽遭官，也是門衰墳未安。改換陰陽移禍福，勸君莫作等閒看。", "sum": "偏凶。可能遇到活動規則變更、訂單問題、票券異常或交易糾紛。務必留意官方規定與交易保障，不要因過去順利就掉以輕心。"}, "第八十一籤": {"text": "假君財物自當還，謀賴心欺他自奸。幸有高臺明月鏡，請來對照破機關。", "sum": "偏凶。特別要小心代購與金錢交易，可能遇到退款拖延、商品不符或不誠實的交易對象。付款前確認資訊並保留紀錄。"}, "第八十二籤": {"text": "彼亦儔中一輩賢，勸君特達與周旋。此時賓主歡相會，他日王侯卻並肩。", "sum": "大吉。人際與互助運極佳，容易遇到可靠的同好或合作夥伴，也可能透過朋友協助取得原本不容易得到的福利。"}, "第八十三籤": {"text": "隨分堂前赴粥饘，何須妄想苦憂煎。主張門戶誠難事，百歲安閒得幾年。", "sum": "平。無須過度追求稀有福利或最高規格的體驗，參加自己負擔得起且真正喜歡的活動就好，沒抽中也不必太在意。"}, "第八十四籤": {"text": "箇中事緒更紛然，當局須知一著先。長舌婦人休酷聽，力行禮義要心堅。", "sum": "平偏慎。粉絲圈可能出現流言與爭議，容易受到他人說法影響。應先確認事實，不要被情緒性言論左右判斷。"}, "第八十五籤": {"text": "一春風雨正瀟瀟，千里行人去路遙。移寡就多君得計，如何歸路轉無聊。", "sum": "先凶後吉。遠征或海外活動可能遇到交通、天候與行程困難，但調整計畫後仍有機會完成目標。活動結束後也可能感到失落，別將所有期待寄託在單一活動上。"}, "第八十六籤": {"text": "一舟行貨好招邀，積少成多自富饒。常把他人比自己，管須日後勝今朝。", "sum": "吉。收藏、周邊與特典運不錯，有機會透過慢慢累積、交換或朋友協助得到想要的收藏，不必盲目比較他人的成果。"}, "第八十七籤": {"text": "陰裏詳看怪爾曹，舟中敵圖笑中刀。藩籬剖破渾無事，一種天生惜羽毛。", "sum": "偏凶。要留意交易、交換特典及共同抽選中的人際風險，不要因為對方看似熟悉就完全放下戒心，重要事項最好留下文字紀錄。"}, "第八十八籤": {"text": "從前作事總徒勞，纔見新春時漸遭。百計營求都得意，更須守己莫心高。", "sum": "大吉。過去的追星挫折有望逐漸改善，抽選、購買與活動參與都可能變得順利，也有機會得到期待已久的福利，但仍要理性控制投入。"}, "第八十九籤": {"text": "樽前無事且高歌，時未來時奈若何。白馬渡江嘶日暮，虎頭城裏看巍峨。", "sum": "先平後吉。想要的追星機會可能尚未到來，目前不一定能立即得到結果。適合先享受日常追星生活，等待更好的活動與福利機會。"}, "第九十籤": {"text": "崆峒城裏事如麻，無事如君有幾家。勸汝不須勤致禱，徒勞生事苦咨嗟。", "sum": "偏凶。近期可能遇到活動混亂、抽選不順、商品問題或粉絲圈爭議。不建議一味強求或追加花費，暫時休息會比較好。"}, "第九十一籤": {"text": "佛說淘沙始見金，只緣君子不勞心。榮華總得詩書效，妙裏工夫仔細尋。", "sum": "大吉。耐心研究抽選規則、活動資訊與購買方式，有機會找到適合自己的機會。努力與累積終將帶來值得期待的福利。"}, "第九十二籤": {"text": "今年禾穀不如前，物價喧騰倍百年。災數流行多疫癘，一陽復後始安全。", "sum": "偏凶，先低後穩。可能遇到追星成本增加、商品漲價、活動取消或延期等狀況。建議控制預算、準備備案，等情況穩定後再投入。"}, "第九十三籤": {"text": "春來雨水太連綿，入夏晴乾雨又愆。節氣直交三伏始，喜逢滂沛足田園。", "sum": "先亂後吉。追星過程可能反覆出現活動改期、抽選延遲或商品出貨不順等變動，但混亂過後仍有機會迎來滿意的結果。"}, "第九十四籤": {"text": "一般器用與人同，巧斲輪輿梓匠工。凡事有緣且隨分，秋冬方遇主人翁。", "sum": "先平後吉。目前可能沒有特別突出的追星機會，但之後有機會遇到適合自己的活動、福利或重要同好。無須急著追求結果，等待緣分成熟即可。"}, "第九十五籤": {"text": "知君袖內有驪珠，生不逢辰亦強圖。可歎頭顱已如許，而今方得貴人扶。", "sum": "大吉。期待已久的福利可能終於迎來轉機，也有不錯的貴人運，容易遇到願意提供抽選、代購、讓票或活動資訊協助的人。"}, "第九十六籤": {"text": "婚姻子息莫嫌遲，但把精神仗佛持。四十年前須報應，功圓行滿育馨兒。", "sum": "先平後吉。追星成果可能來得較慢，抽選、簽售或特別福利需要時間累積，並非沒有機會，不必因一兩次失敗就失去信心。"}, "第九十七籤": {"text": "五十功名心已灰，那知富貴逼人來。更行好事存方寸，壽比岡陵位鼎台。", "sum": "大吉。可能在不抱期待時意外獲得好成果，例如抽中福利、收到親簽或買到稀有收藏。不過度執著，反而容易迎來驚喜。"}, "第九十八籤": {"text": "經營百出費精神，南北奔馳運未新。玉兔交時當得意，恰如枯木再逢春。", "sum": "先凶後大吉。前期可能投入許多時間與心力，卻始終沒有明顯收穫，但之後有機會迎來轉機，甚至獲得重新燃起追星熱情的驚喜福利。"}, "第九十九籤": {"text": "貴人遭遇水雲鄉，冷淡交情滋味長。黃閣開時延故客，驊騮應得驟康莊。", "sum": "大吉。貴人運旺，容易透過熟識的同好獲得抽選資訊、代購或活動協助，在關鍵時刻得到幫助，讓追星之路更加順遂。"}, "第一百籤": {"text": "我本天仙雷雨師，吉凶禍福我先知。至誠禱祝皆靈應，抽得終籤百事宜。", "sum": "大吉。百事皆宜，是整套籤詩中非常好的收尾。無論抽選、簽售、演唱會、周邊特典,親簽或海外活動，都有機會獲得滿意成果，過去的努力與等待也將逐漸得到回報。"}};
+
+// 藝人歸屬四分法判定器 (BOYNEXTDOOR, CNBLUE, 李茂珍, 其他)
+const normArtist = (name, item = '') => {
+  const s = String(name || '') + ' ' + String(item || '');
+  if (/CNBLUE/.test(s)) return 'CNBLUE';
+  if (/李茂珍|LEE MU JIN|LEE MUJIN/.test(s)) return '李茂珍';
+  if (/BOYNEXTDOOR|BBNEX|成淏|雲鶴|ONEDOOR|CATBBI|WOONBABY|擠擠娃包/.test(s)) return 'BOYNEXTDOOR';
+  return '其他';
+};
+
+function onPoemSelect(no) {
+  if (!no || !POEMS[no]) return;
+  const p = POEMS[no];
+  if ($('#fno')) $('#fno').value = no;
+  if ($('#ftx')) $('#ftx').value = p.text;
+  if ($('#fsum')) $('#fsum').value = p.sum;
+}
+
+const fmt = n => '$' + Math.round(n || 0).toLocaleString();
+const TODAY = '2026-11-06', YR = '2026';
+const rooms = [
+  ['home', '🛋️', '客廳'],
+  ['events', '📚', '書房'],
+  ['merch', '👗', '衣帽間'],
+  ['tour', '🧳', '行李箱'],
+  ['wall', '🖼️', '相片牆'],
+  ['ledger', '📒', '帳本']
+];
+const A = ['BOYNEXTDOOR', 'CNBLUE', '李茂珍', '其他'];
+
+// 常用代購對帳單列表
+const PRESET_LINKS = [
+  { name: '방방-對帳表', url: 'https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0' },
+  { name: '🦔JHee韓國團購代買', url: 'https://docs.google.com/spreadsheets/d/1Z2Ybljx8vnQfMA0yPbJ-2m7BTRPmyAGFlE5Cgz2scns/edit?gid=1529919725#gid=1529919725' },
+  { name: '對帳表NEW', url: 'https://docs.google.com/spreadsheets/d/1uPwPH6M5pUKJ7YCF5Y8ijwBJrO5tRnFecaskMu1EliY/edit' },
+  { name: '응응韓娛代購對帳表', url: 'https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994' },
+  { name: '服飾團務進度對帳表 (2025)－Ms.Mina', url: 'https://docs.google.com/spreadsheets/d/1u8qanSs1nbKVnal2x-vA3aY3Ewujwzcpjwl9iydD7Gg/edit' },
+  { name: 'BND拆拆 對帳區', url: 'https://docs.google.com/spreadsheets/d/1gvEOgrq66f3-Pwf-BP4ztgyYoOEDM_qS9XavnL_JOEs/edit?gid=1340888510#gid=1340888510' },
+  { name: 'HYBE股東代購對帳總表', url: 'https://docs.google.com/spreadsheets/d/1Zs5rfB5LgtKUEfMZ1fXvqcOfSG5UpUgX_SFXDWfds4c/edit?gid=1057699584#gid=1057699584' },
+  { name: '進度表✨對帳表', url: 'https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0' },
+  { name: 'AxMxP 代購進度', url: 'https://docs.google.com/spreadsheets/d/1ehiCsOTnu3oXWm6v68N5tOjFkclbOEetI4XSCi5ClUc/edit?gid=0#gid=0' },
+  { name: 'BND小卡拆拆對帳進度表', url: 'https://docs.google.com/spreadsheets/d/1mMapac5uzyxbPvqilgeu-5EfnAdvZ3SFoT7DNwYP4uI/edit?gid=660163147#gid=660163147' }
+];
+
+const F = {
+  ev: { t: '成果發表會', f: [
+    ['artist', '藝人/團體'],
+    ['name', '活動名稱'],
+    ['type', '活動種類', 's', ['專場', '拼盤演唱會', '棒球賽', '電影直播', '見面會', '展覽', '其他']],
+    ['date', '活動日期', 'date'],
+    ['venue', '地點'],
+    ['seat', '座位資訊'],
+    ['price', '票面金額 TWD', 'n'],
+    ['must', '必看預抓款', 's', ['否', '是']],
+    ['est', '預估預留金額 TWD', 'n'],
+    ['tour_id', '關聯海外遠征專案', 'tour_select'],
+    ['ticket', '票根/照片（Google Drive 連結 或 點右側圖庫上傳）'],
+    ['recap', '返圖資料夾（Google Drive 連結）'],
+    ['notes', '心得／備註', 'a']
+  ]},
+  pr: { t: '資助小門紀錄', f: [
+    ['artist', '藝人/團體'],
+    ['name', '商品名稱'],
+    ['cat', '類別', 's', ['官方周邊', '專輯', '手燈', '娃娃', '應援物', '飯製周邊', '飯拍', '小門同款', '其他']],
+    ['src', '來源', 's', ['網拍賣家代購', '個人賣家收購', '官方WVS', '實體門市', '生咖', '親友贈送', '其他']],
+    ['date', '購買日期', 'date'],
+    ['pay', '付款方式', 's', ['付全額', '先付待二補', '已補款', '貨到付款', '付訂金', '現金']],
+    ['init', '先付金額', 'n'],
+    ['supp', '二補金額', 'n'],
+    ['deliv', '到貨狀態', 's', ['尚未發行', '運送中', '已到貨', '已取貨', '未到貨']],
+    ['link', '代購連結（可填網址或點選下方常用對帳單快速帶入）'],
+    ['notes', '備註', 'a']
+  ]},
+  ov: { t: '愛心氾濫紀錄', f: [
+    ['date', '支出日期', 'date'],
+    ['artist', '藝人/團體'],
+    ['name', '項目說明'],
+    ['cat', '類別', 's', ['泡泡', '專輯', '周邊', '影音', '其他']],
+    ['amount', '金額 TWD', 'n'],
+    ['deliv', '狀態', 's', ['已到貨', '等待中', '已扣款']],
+    ['link', '代購連結（可填網址或點選下方常用對帳單快速帶入）']
+  ]},
+  tp: { t: '海外遠征專案', f: [
+    ['artist', '所屬藝人', 's', A],
+    ['title', '行程名稱'],
+    ['dest', '國家與城市'],
+    ['start', '出發日', 'date'],
+    ['end', '回程日', 'date'],
+    ['notes', '備註', 'a']
+  ]},
+  te: { t: '外站花費', f: [
+    ['date', '消費日期', 'date'],
+    ['item', '支出項目'],
+    ['cat', '屬性', 's', ['演唱會相關', '合理必要支出', '娛樂美食', '交通費', '刷卡購物']],
+    ['pay', '支付方式', 's', ['富邦J卡', '台新FlyGo', '現金', 'WOWPASS', '信用卡']],
+    ['cur', '原始幣別', 's', ['台幣', '韓元', '新幣', '美元', '外幣']],
+    ['orig', '外幣原額', 'n'],
+    ['twd', '實扣台幣', 'n'],
+    ['notes', '計算式備註', 'a']
+  ]},
+  fs: { t: '飯撒紀錄', f: [
+    ['date', '發生日期', 'date'],
+    ['group', '所屬團體'],
+    ['member', '成員名稱'],
+    ['event_id', '關聯成果發表會場次', 'event_select'],
+    ['notes', '互動經過與心得', 'a'],
+    ['photo', '照片（Google Drive 連結 或 點右側圖庫上傳）']
+  ]}
+};
+
+let n = 2000;
+const id = () => 'x' + (n++);
+
+let D = {
+  cfg: { conc: 70000, merch: 10000, month: 4500, target: 2420 },
+  fort: {
+    no: "第九十九籤",
+    text: "貴人遭遇水雲鄉，冷淡交情滋味長。黃閣開時延故客，驊騮應得驟康莊。",
+    sum: "大吉。貴人運旺，容易透過熟識的同好獲得抽選資訊、代購或活動協助，在關鍵時刻得到幫助，讓追星之路更加順遂。",
+    locked: true
+  },
+  yearly: {},
+  ev: [
+    { id: "ev_1", artist: "告五人", name: "告五人2022愛在夏天演唱會", type: "專場", date: "2022-09-17", venue: "台北市立兒童新樂園", seat: "早鳥搖滾票", price: 2000.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_2", artist: "五月天", name: "五月天 2023 諾亞方舟 十週年進化 復刻限定版演唱會", type: "專場", date: "2022-12-24", venue: "桃園國際棒球場", seat: "搖滾區A7 藍2B區1排9號", price: 3880.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_3", artist: "(G)I-DLE", name: "2023 (G)I-DLE WORLD TOUR [I am FREE-TY] IN TAIPEI", type: "專場", date: "2023-07-01", venue: "台北流行音樂中心", seat: "2樓2B區4排4號", price: 5052.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_4", artist: "CNBLUE", name: "2024 CNBLUE LIVE-VOYAGE into X IN TAIPEI", type: "專場", date: "2024-11-02", venue: "林口體育館", seat: "橙2A-2 9排13號", price: 2880.0, must: "否", est: 0, ticket: "", recap: "", notes: "搭乘 機場捷運-普通車 在「A7體育大學站」下車，步行約10分鐘抵達。" },
+    { id: "ev_5", artist: "周杰倫", name: "周杰倫 嘉年華 世界巡迴演唱會", type: "專場", date: "2024-12-07", venue: "台北大巨蛋", seat: "L5看台513部份視線遮蔽區1排18號", price: 1880.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_6", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.1’ IN INCHEON", type: "專場", date: "2024-12-14", venue: "INSPIRE Arena", seat: "VIP席Side F5. Row 5. 1", price: 0, must: "否", est: 0, ticket: "", recap: "", notes: "門票4723機票9157*(1-0.05)住宿4595*(1-0.038)", tour_id: "tp_1" },
+    { id: "ev_7", artist: "張惠妹", name: "ASMR Maxxx @ Taipei Dome 世界巡迴演唱會", type: "專場", date: "2024-12-21", venue: "台北大巨蛋", seat: "L5看台區508區16排7號", price: 1280.0, must: "否", est: 0, ticket: "", recap: "", notes: "2024/12/16阿寧同事" },
+    { id: "ev_8", artist: "CNBLUE", name: "1st FNC BAND KINGDOM in Taoyuan", type: "拼盤演唱會", date: "2025-01-05", venue: "桃園市立綜合體育館（桃園巨蛋）", seat: "紫7區 8排47號", price: 4600.0, must: "否", est: 0, ticket: "", recap: "", notes: "2024/12/10領票，1.建議可搭乘火車至桃園火車站,步行約十八分鐘。(建議步行前往)" },
+    { id: "ev_9", artist: "蘇打綠", name: "蘇打綠《二十年一刻》巡迴演唱會", type: "專場", date: "2025-02-22", venue: "台北小巨蛋", seat: "黃3H區 28排9號", price: 800.0, must: "否", est: 0, ticket: "", recap: "", notes: "2025/02/17領票" },
+    { id: "ev_10", artist: "李茂珍", name: "2025 LEE MUJIN CONCERT [別冊附錄] in TAIPEI", type: "專場", date: "2025-03-08", venue: "Zepp New Taipei", seat: "2F 座席 區 2G 排 2 號", price: 2990.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_11", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN SINGAPORE", type: "專場", date: "2025-03-15", venue: "Arena @ EXPO (Hall 7)", seat: "111區 Row A , Seat 12", price: 0, must: "否", est: 0, ticket: "", recap: "", notes: "門票FLYGO卡5376 機票9596", tour_id: "tp_2" },
+    { id: "ev_12", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN TAIPEI", type: "專場", date: "2025-04-03", venue: "新北市工商展覽中心", seat: "VIP3區 103號", price: 6800.0, must: "否", est: 0, ticket: "", recap: "", notes: "林綺大嫂" },
+    { id: "ev_13", artist: "SUPER JUNIOR", name: "第20 屆KKBOX 風雲榜", type: "拼盤演唱會", date: "2025-04-19", venue: "高雄巨蛋", seat: "綠215區19排8號", price: 0.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_14", artist: "CNBLUE", name: "2025 CNBLUE LIVE – VOYAGE into X IN KAOHSIUNG", type: "專場", date: "2025-05-24", venue: "高雄流行音樂中心", seat: "2樓2B區-26排34號", price: 3880.0, must: "否", est: 0, ticket: "", recap: "", notes: "慧慧" },
+    { id: "ev_15", artist: "BOYNEXTDOOR", name: "2025 Weverse Con Festival", type: "拼盤演唱會", date: "2025-05-31", venue: "INSPIRE Entertainment Resort", seat: "自由座", price: 2467.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_16", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.1’ FINAL", type: "專場", date: "2025-07-27", venue: "KSPO DOME (Olympic Gymnastics Arena)", seat: "9區 Row 14 Seat 8", price: 0, must: "否", est: 0, ticket: "", recap: "", notes: "門票3663 機票9386", tour_id: "tp_3" },
+    { id: "ev_17", artist: "CNBLUE", name: "2025 FNC BAND KINGDOM IN KAOHSIUNG", type: "拼盤演唱會", date: "2025-08-02", venue: "高雄巨蛋", seat: "綠410區1排10號", price: 4800.0, must: "否", est: 0, ticket: "", recap: "", notes: "阿呆" },
+    { id: "ev_18", artist: "CNBLUE", name: "2025 FNC BAND KINGDOM IN KAOHSIUNG", type: "拼盤演唱會", date: "2025-08-03", venue: "高雄巨蛋", seat: "綠514區2排12號", price: 3800.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_19", artist: "蔡依林", name: "國泰世華銀行 JOLIN 蔡依林 PLEASURE世界巡迴演唱會 TAIPEI 2025-2026", type: "專場", date: "2026-01-01", venue: "台北大巨蛋", seat: "513區10排12號", price: 2990.0, must: "否", est: 0, ticket: "", recap: "", notes: "小佩蓁KKTIX" },
+    { id: "ev_20", artist: "BOYNEXTDOOR", name: "第40屆金唱片頒獎典禮 The 40th Golden Disc Awards", type: "拼盤演唱會", date: "2026-01-10", venue: "台北大巨蛋", seat: "L4看台404區3980_4排-8號", price: 3980.0, must: "否", est: 0, ticket: "", recap: "", notes: "阿寧IBON 1/5取票" },
+    { id: "ev_21", artist: "王心凌", name: "2026 vivo王心凌 SUGAR HIGH 2.0世界巡迴演唱會 台北站", type: "專場", date: "2026-01-24", venue: "台北小巨蛋", seat: "3樓黃3G區-27排-10號", price: 800.0, must: "否", est: 0, ticket: "", recap: "", notes: "寬宏售票" },
+    { id: "ev_22", artist: "CNBLUE", name: "2026 CNBLUE LIVE WORLD TOUR ‘3LOGY’ IN TAIPEI", type: "專場", date: "2026-03-07", venue: "台北流行音樂中心", seat: "3樓3B區-14排-11號", price: 3880.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_23", artist: "BOYNEXTDOOR", name: "2026 7-ELEVEN高雄櫻花季 SAKURA FESTIVAL", type: "拼盤演唱會", date: "2026-03-13", venue: "夢時代", seat: "搖滾座位B區_12排-1號", price: 2545.0, must: "否", est: 0, ticket: "", recap: "", notes: "退一般區900的手續費45" },
+    { id: "ev_24", artist: "李茂珍", name: "2026 LEE MU JIN LIVE CONCERT [Today’s, eMUtion] in TAIPEI", type: "專場", date: "2026-03-14", venue: "Legacy TERA", seat: "A2區18排31號", price: 3680.0, must: "否", est: 0, ticket: "", recap: "", notes: "抽到1:10合照" },
+    { id: "ev_25", artist: "QWER", name: "富邦悍將主場例行賽|中信兄弟vs富邦悍將", type: "棒球賽", date: "2026-05-30", venue: "台北大巨蛋", seat: "L4內野402區-6排-19號", price: 800.0, must: "否", est: 0, ticket: "", recap: "", notes: "半票" },
+    { id: "ev_26", artist: "CNBLUE", name: "富邦悍將主場例行賽|中信兄弟vs富邦悍將", type: "棒球賽", date: "2026-05-31", venue: "台北大巨蛋", seat: "L5內野512區-13排-11號", price: 800.0, must: "否", est: 0, ticket: "", recap: "", notes: "半票" },
+    { id: "ev_27", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN SEOUL", type: "專場", date: "2026-07-18", venue: "KSPO DOME (Olympic Gymnastics Arena)", seat: "2區 Row 22 Seat 9", price: 0, must: "否", est: 0, ticket: "", recap: "", notes: "門票3411/NANAME/165000韓元", tour_id: "tp_4" },
+    { id: "ev_28", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN SEOUL", type: "專場", date: "2026-07-19", venue: "KSPO DOME (Olympic Gymnastics Arena)", seat: "35區 Row 14 Seat 10", price: 0, must: "否", est: 0, ticket: "", recap: "", notes: "門票3641元/173000韓元 機票8099", tour_id: "tp_4" },
+    { id: "ev_29", artist: "BOYNEXTDOOR", name: "(LIVE)BOYNEXTDOOR TOUR KNOCK ON Vol.2 IN JAPAN現場", type: "電影直播", date: "2026-08-29", venue: "板橋大遠百威秀影城", seat: "M18", price: 1400.0, must: "否", est: 0, ticket: "", recap: "", notes: "阿柔帳號" },
+    { id: "ev_30", artist: "&Team", name: "MUSIC EXPO LIVE 2026 in TAIPEI", type: "拼盤演唱會", date: "2026-10-25", venue: "台北小巨蛋", seat: "3樓黃3H區-26排-3號", price: 800.0, must: "否", est: 0, ticket: "", recap: "", notes: "寬宏" },
+    { id: "ev_31", artist: "(G)I-DLE", name: "《流光穿梭 十年傳說》傳說十週年演唱會", type: "拼盤演唱會", date: "2026-10-31", venue: "台北大巨蛋", seat: "L4看台408區_2排-6號", price: 790.0, must: "否", est: 0, ticket: "", recap: "", notes: "" },
+    { id: "ev_32", artist: "CNBLUE", name: "2026 FNC BAND KINGDOM IN TAIPEI", type: "拼盤演唱會", date: "2026-11-07", venue: "林口體育館", seat: "VIP 3 16排27號", price: 6580.0, must: "否", est: 0, ticket: "", recap: "", notes: "한나" },
+    { id: "ev_33", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN TAIPEI", type: "專場", date: "2027-01-08", venue: "林口體育館", seat: "黃4A-2區 14排19號", price: 3980.0, must: "否", est: 0, ticket: "", recap: "", notes: "阿呆" },
+    { id: "ev_34", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN TAIPEI", type: "專場", date: "2027-01-09", venue: "林口體育館", seat: "", price: 6980.0, must: "否", est: 0, ticket: "", recap: "", notes: "阿寧 內部票" },
+    { id: "ev_35", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR ‘KNOCK ON Vol.2’ IN TAIPEI", type: "專場", date: "2027-01-10", venue: "林口體育館", seat: "橙1B-2區 5排28號", price: 5980.0, must: "否", est: 0, ticket: "", recap: "", notes: "杳杳" }
+  ],
+  pr: [
+    { id: "pr_1", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR OFFICIAL LIGHT STICK 官方應援手燈燈座組", cat: "官方周邊", src: "網拍賣家代購", date: "2024-06-15", pay: "付全額", init: 1756.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "韓代頑童" },
+    { id: "pr_2", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - AND, Weverse Shop Japan限定盤", cat: "專輯", src: "網拍賣家代購", date: "2024-06-19", pay: "付全額", init: 930.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "微樂客蝦皮預購" },
+    { id: "pr_3", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - WHO! ( 1ST SINGLE ) Who Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-06-26", pay: "付全額", init: 550.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "微樂客蝦皮" },
+    { id: "pr_4", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - HOW?（2ND EP） Earth Ver", cat: "專輯", src: "實體門市", date: "2024-06-29", pay: "現金", init: 620.0, supp: 0.0, deliv: "已到貨", link: "", notes: "K-MONSTAR 微風南山" },
+    { id: "pr_5", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - WHY... ( 1ST EP ) Moody Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-06-30", pay: "貨到付款", init: 394.0, supp: 0.0, deliv: "已到貨", link: "", notes: "蝦皮韓國代購" },
+    { id: "pr_6", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - WHY... ( 1ST EP ) Letter Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-06-30", pay: "貨到付款", init: 249.0, supp: 0.0, deliv: "已到貨", link: "", notes: "蝦皮韓國代購" },
+    { id: "pr_7", artist: "BOYNEXTDOOR- HOW?（2ND EP） Sticker Ver", name: "BOYNEXTDOOR- HOW?（2ND EP） Sticker Ver", cat: "專輯", src: "個人賣家收購", date: "2024-07-19", pay: "付訂金", init: 208.0, supp: 0.0, deliv: "已到貨", link: "", notes: "170+38 小夜曲社團" },
+    { id: "pr_8", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR LOGO設計", cat: "飯製周邊", src: "個人賣家收購", date: "2024-09-03", pay: "貨到付款", init: 400.0, supp: 0.0, deliv: "已到貨", link: "", notes: "FB，預計月底前" },
+    { id: "pr_9", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR COLLECTED BOOK VOL.1", cat: "官方周邊", src: "網拍賣家代購", date: "2024-07-15", pay: "付全額", init: 660.0, supp: 142.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購社群貨物660+二補84+包手20+運費38" },
+    { id: "pr_10", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP", cat: "官方周邊", src: "官方WVS", date: "2024-07-15", pay: "付全額", init: 678.0, supp: 0.0, deliv: "已到貨", link: "", notes: "會員" },
+    { id: "pr_11", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR LIFE4CUTS", cat: "官方周邊", src: "實體門市", date: "2024-07-20", pay: "現金", init: 750.0, supp: 0.0, deliv: "已到貨", link: "", notes: "250*3(1.4.6)" },
+    { id: "pr_12", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - AND, 初回限定盤B版", cat: "專輯", src: "個人賣家收購", date: "2024-07-22", pay: "付全額", init: 450.0, supp: 38.0, deliv: "已到貨", link: "", notes: "小夜曲社團450+38" },
+    { id: "pr_13", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - AND, 小熊單封", cat: "專輯", src: "個人賣家收購", date: "2024-07-22", pay: "付全額", init: 130.0, supp: 38.0, deliv: "已到貨", link: "", notes: "小夜曲社團130+38" },
+    { id: "pr_14", artist: "BOYNEXTDOOR", name: "ONEDOOR 刺青貼紙", cat: "飯製周邊", src: "網拍賣家代購", date: "2024-07-27", pay: "貨到付款", init: 290.0, supp: 0.0, deliv: "已到貨", link: "", notes: "蝦皮 100張" },
+    { id: "pr_15", artist: "BOYNEXTDOOR", name: "ONEDOOR 一般貼紙", cat: "飯製周邊", src: "網拍賣家代購", date: "2024-07-27", pay: "貨到付款", init: 250.0, supp: 45.0, deliv: "已到貨", link: "", notes: "蝦皮 霧膜 透明貼 延邊切割 120張250+45" },
+    { id: "pr_16", artist: "BOYNEXTDOOR [1周年-2024 DOORJANCHI]-(WOONHAK)項鍊", name: "BOYNEXTDOOR [1周年-2024 DOORJANCHI]-(WOONHAK)項鍊", cat: "官方周邊", src: "個人賣家收購", date: "2024-08-09", pay: "付訂金", init: 300.0, supp: 308.0, deliv: "已到貨", link: "", notes: "小夜曲社團 300已匯款+250尾款+58運費" },
+    { id: "pr_17", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 漢小咪 生咖", cat: "飯製周邊", src: "生咖", date: "2024-08-10", pay: "現金", init: 219.0, supp: 0.0, deliv: "已到貨", link: "", notes: "Old soul 老靈魂 coffee studio" },
+    { id: "pr_18", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR- 19.99（3ND EP） WeVerse Albums Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-08-13", pay: "付全額", init: 300.0, supp: 48.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購社群貨物 包手10 運費38" },
+    { id: "pr_19", artist: "BOYNEXTDOOR", name: "𝐁𝐍𝐃 一週年應援 飯製", cat: "飯製周邊", src: "個人賣家收購", date: "2024-08-14", pay: "貨到付款", init: 337.0, supp: 38.0, deliv: "已到貨", link: "", notes: "吊飾45*6腳架55小卡12運費38 @luv_hwangbin" },
+    { id: "pr_20", artist: "BOYNEXTDOOR- 19.99（3ND EP） Nice Ver", name: "BOYNEXTDOOR- 19.99（3ND EP） Nice Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-08-15", pay: "付全額", init: 150.0, supp: 72.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1Z2Ybljx8vnQfMA0yPbJ-2m7BTRPmyAGFlE5Cgz2scns/edit?gid=1529919725#gid=1529919725", notes: "需二補 小夜曲社團임재희" },
+    { id: "pr_21", artist: "BOYNEXTDOOR- 19.99（3ND EP） Dangerous Ver", name: "BOYNEXTDOOR- 19.99（3ND EP） Dangerous Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-08-15", pay: "付全額", init: 150.0, supp: 73.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1Z2Ybljx8vnQfMA0yPbJ-2m7BTRPmyAGFlE5Cgz2scns/edit?gid=1529919725#gid=1529919725", notes: "需二補 小夜曲社團임재희" },
+    { id: "pr_22", artist: "BOYNEXTDOOR- 19.99（3ND EP） Twenty Ver", name: "BOYNEXTDOOR- 19.99（3ND EP） Twenty Ver", cat: "專輯", src: "網拍賣家代購", date: "2024-08-15", pay: "付全額", init: 150.0, supp: 73.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1Z2Ybljx8vnQfMA0yPbJ-2m7BTRPmyAGFlE5Cgz2scns/edit?gid=1529919725#gid=1529919725", notes: "小夜曲社團임재희境ين20國際150包材10運費38" },
+    { id: "pr_23", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR- 成淏生日小卡", cat: "官方周邊", src: "網拍賣家代購", date: "2024-08-28", pay: "付全額", init: 290.0, supp: 48.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫社群 包材10 運費38" },
+    { id: "pr_24", artist: "BOYNEXTDOOR自印小卡", cat: "飯製周邊", src: "網拍賣家代購", date: "2024-09-10", pay: "付訂金", init: 263.0, supp: 313.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1uPwPH6M5pUKJ7YCF5Y8ijwBJrO5tRnFecaskMu1EliY/edit", notes: "訂金263尾款263運費50" },
+    { id: "pr_25", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR-迷三週邊 成員吊飾", cat: "官方周邊", src: "網拍賣家代購", date: "2024-09-19", pay: "付全額", init: 920.0, supp: 68.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 朴成淏、金雲鶴 二補20 包材10 運費38" },
+    { id: "pr_26", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR-WEGO聯名毛帽（米）", cat: "官方周邊", src: "網拍賣家代購", date: "2024-10-02", pay: "付全額", init: 780.0, supp: 87.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 毛帽 $780二補29包材20運費38" },
+    { id: "pr_27", artist: "BOYNEXTDOOR- 19.99（3ND EP）小熊單封", name: "BOYNEXTDOOR- 19.99（3ND EP）小熊單封", cat: "專輯", src: "個人賣家收購", date: "2024-10-05", pay: "付全額", init: 250.0, supp: 0.0, deliv: "已到貨", link: "", notes: "小夜曲社團Sophia" },
+    { id: "pr_28", artist: "BOYNEXTDOOR- 19.99（3ND EP）小貓單封", name: "BOYNEXTDOOR- 19.99（3ND EP）小貓單封", cat: "專輯", src: "個人賣家收購", date: "2024-10-05", pay: "付全額", init: 250.0, supp: 0.0, deliv: "已到貨", link: "", notes: "小夜曲社團Sophia" },
+    { id: "pr_29", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 成淏 19.99 愛豆驛站特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2024-10-05", pay: "付全額", init: 370.0, supp: 0.0, deliv: "已到貨", link: "", notes: "小夜曲社團Sophia" },
+    { id: "pr_30", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 HOW WVS末簽特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2024-10-05", pay: "付全額", init: 350.0, supp: 38.0, deliv: "已到貨", link: "", notes: "小夜曲社團Sophia 運費38" },
+    { id: "pr_31", artist: "BOYNEXTDOOR-WEGO聯名大學踢（M；白）", name: "BOYNEXTDOOR-WEGO聯名大學踢（M；白）", cat: "官方周邊", src: "網拍賣家代購", date: "2024-10-02", pay: "付全額", init: 1320.0, supp: 166.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 二補118包手10運費38 大學踢 $1320" },
+    { id: "pr_32", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR- 雲鶴生日小卡", cat: "官方周邊", src: "網拍賣家代購", date: "2024-11-22", pay: "付全額", init: 290.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購" },
+    { id: "pr_33", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR- 年曆 雲鶴拆卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-01-09", pay: "付全額", init: 140.0, supp: 50.0, deliv: "已到貨", link: "", notes: "小夜曲社團 綠豆加薏仁" },
+    { id: "pr_34", artist: "BOYNEXTDOOR BBNEXTDO系列 娃娃鑰匙圈", name: "BOYNEXTDOOR BBNEXTDO系列 娃娃鑰匙圈", cat: "官方周邊", src: "網拍賣家代購", date: "2025-01-07", pay: "付全額", init: 4080.0, supp: 114.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 娃娃鑰匙圈（全員） $680*6" },
+    { id: "pr_35", artist: "BOYNEXTDOOR BBNEXTDO系列 手燈套", name: "BOYNEXTDOOR BBNEXTDO系列 手燈套", cat: "官方周邊", src: "網拍賣家代購", date: "2025-01-07", pay: "付全額", init: 1320.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 手燈套（朴成淏、金雲鶴） $660*2" },
+    { id: "pr_36", artist: "BOYNEXTDOOR BBNEXTDO系列 卡套", name: "BOYNEXTDOOR BBNEXTDO系列 卡套", cat: "官方周邊", src: "網拍賣家代購", date: "2025-01-07", pay: "付全額", init: 1120.0, supp: 28.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1LNI5MU9I8gY5FDgV2HtsZiO4xZDwfvbvfpNUHkgEJmc/edit?gid=0#gid=0", notes: "幫幫代購 卡套（朴成淏、金雲鶴） $560*2" },
+    { id: "pr_37", artist: "BOYNEXTDOOR", name: "ONEDOOR MEMBERSHIP KIT", cat: "官方周邊", src: "官方WVS", date: "2025-02-12", pay: "付全額", init: 531.0, supp: 174.0, deliv: "已到貨", link: "", notes: "@의yi 代收" },
+    { id: "pr_38", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN TAIPEI應援面紙", cat: "飯製周邊", src: "網拍賣家代購", date: "2025-03-02", pay: "付全額", init: 400.0, supp: 437.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1uPwPH6M5pUKJ7YCF5Y8ijwBJrO5tRnFecaskMu1EliY/edit", notes: "700+加急99+運費38 覺JIAO" },
+    { id: "pr_39", artist: "BOYNEXTDOOR [KNOCK ON Vol.1 IN JAPAN] INSTANT PHOTO CARD", name: "BOYNEXTDOOR [KNOCK ON Vol.1 IN JAPAN] INSTANT PHOTO CARD", cat: "官方周邊", src: "個人賣家收購", date: "2025-02-28", pay: "付全額", init: 600.0, supp: 0.0, deliv: "已到貨", link: "", notes: "150*4 有腦豆@Rui 官方出貨日：5月下旬" },
+    { id: "pr_40", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN TAIPEI應援小鏡子約稿", cat: "飯製周邊", src: "個人賣家收購", date: "2025-03-06", pay: "貨到付款", init: 600.0, supp: 100.0, deliv: "已到貨", link: "", notes: "湘晚 600+星巴克" },
+    { id: "pr_41", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN TAIPEI應援小鏡子", cat: "飯製周邊", src: "網拍賣家代購", date: "2025-03-10", pay: "貨到付款", init: 418.0, supp: 0.0, deliv: "已到貨", link: "", notes: "小熊*16" },
+    { id: "pr_42", artist: "BOYNEXTDOOR BBNEXTDO系列 手機支架", name: "BOYNEXTDOOR BBNEXTDO系列 手機支架", cat: "官方周邊", src: "個人賣家收購", date: "2025-03-21", pay: "貨到付款", init: 0.0, supp: 564.0, deliv: "已到貨", link: "", notes: "手機支架（朴成淏、金雲鶴）260+275+(20+運費38)/2" },
+    { id: "pr_43", artist: "BOYNEXTDOOR BBNEXTDO系列 身分證卡套", name: "BOYNEXTDOOR BBNEXTDO系列 身分證卡套", cat: "官方周邊", src: "個人賣家收購", date: "2025-03-21", pay: "貨到付款", init: 0.0, supp: 109.0, deliv: "已到貨", link: "", notes: "身分證卡套（朴成淏）80+(20+運費38)/2" },
+    { id: "pr_44", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.1' IN TAIPEI應援小鏡子", cat: "飯製周邊", src: "網拍賣家代購", date: "2025-03-22", pay: "貨到付款", init: 0.0, supp: 437.0, deliv: "已到貨", link: "", notes: "小貓*17、小熊*3" },
+    { id: "pr_45", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 成淏 WHY線下M2U 2.0 幸運卡(校服)", cat: "官方周邊", src: "個人賣家收購", date: "2025-04-06", pay: "貨到付款", init: 0.0, supp: 372.0, deliv: "已到貨", link: "", notes: "有腦豆@Nov" },
+    { id: "pr_46", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 WHY WVS直播特典卡(貝雷敬禮)", cat: "官方周邊", src: "個人賣家收購", date: "2025-04-06", pay: "貨到付款", init: 0.0, supp: 423.0, deliv: "已到貨", link: "", notes: "有腦豆@Nov" },
+    { id: "pr_47", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP(哥哥的)", cat: "官方周邊", src: "官方WVS", date: "2025-04-18", pay: "付全額", init: 576.0, supp: 0.0, deliv: "已到貨", link: "", notes: "max31309" },
+    { id: "pr_48", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 朴成淏普通版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 245.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
+    { id: "pr_49", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 金雲鶴普通版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 265.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
+    { id: "pr_50", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 金雲鶴單封版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 214.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
+    { id: "pr_51", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 朴成淏單封版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 174.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
+    { id: "pr_52", artist: "BOYNEXTDOOR- NO GENRE（4ND EP） WeVerse Albums Ver", name: "BOYNEXTDOOR- NO GENRE（4ND EP） WeVerse Albums Ver", cat: "專輯", src: "實體門市", date: "2025-05-31", pay: "現金", init: 283.0, supp: 0.0, deliv: "已到貨", link: "", notes: "WOWPASS IN WITHMUU 弘大店" },
+    { id: "pr_53", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP續訂會員", cat: "官方周邊", src: "官方WVS", date: "2025-06-26", pay: "付全額", init: 530.0, supp: 0.0, deliv: "已到貨", link: "", notes: "" },
+    { id: "pr_54", artist: "BOYNEXTDOOR", name: "傑西飯製擠擠娃包", cat: "飯製周邊", src: "個人賣家收購", date: "2025-07-06", pay: "付全額", init: 180.0, supp: 38.0, deliv: "已到貨", link: "", notes: "180+38" },
+    { id: "pr_55", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR Official Light Stick Keyring", cat: "官方周邊", src: "官方WVS", date: "2025-07-16", pay: "付全額", init: 467.0, supp: 60.0, deliv: "已到貨", link: "", notes: "Weverse Shop自行下單" },
+    { id: "pr_56", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR - SPAO聯名 成套睡衣 雲寶寶睡衣M", cat: "官方周邊", src: "個人賣家收購", date: "2025-08-22", pay: "付全額", init: 1000.0, supp: 138.0, deliv: "已到貨", link: "", notes: "臉書社團YUYU+幫幫轉單" },
+    { id: "pr_57", artist: "BOYNEXTDOOR [SUNGHO] Photo Card Set 成淏生日小卡", name: "BOYNEXTDOOR [SUNGHO] Photo Card Set 成淏生日小卡", cat: "官方周邊", src: "官方WVS", date: "2025-08-29", pay: "付全額", init: 244.0, supp: 40.0, deliv: "已到貨", link: "", notes: "10000韓元 WVS自行下單" },
+    { id: "pr_58", artist: "BOYNEXTDOOR [SUNGHO] Photo Card Stand Set 成淏生日立牌", name: "BOYNEXTDOOR [SUNGHO] Photo Card Stand Set 成淏生日立牌", cat: "官方周邊", src: "官方WVS", date: "2025-08-29", pay: "付全額", init: 568.0, supp: 40.0, deliv: "已到貨", link: "", notes: "24000韓元 WVS自行下單" },
+    { id: "pr_59", artist: "BOYNEXTDOOR", name: "20230602 音銀迷你飯咪 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-30", pay: "付全額", init: 950.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20230602 音銀迷你飯咪 雲鶴.哩嗚.泰山 213P @4.46" },
+    { id: "pr_60", artist: "BOYNEXTDOOR", name: "20240615 WVS CON 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-30", pay: "付全額", init: 200.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20240615 WVS CON 雲鶴 53P @3.77" },
+    { id: "pr_61", artist: "BOYNEXTDOOR", name: "20250531 WVS CON 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-30", pay: "付全額", init: 400.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20250531 WVS CON 雲鶴 100P @4" },
+    { id: "pr_62", artist: "BOYNEXTDOOR", name: "20231225 SBS 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-31", pay: "付全額", init: 100.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20231225 SBS 雲鶴.耶比111P @0.9" },
+    { id: "pr_63", artist: "BOYNEXTDOOR", name: "20240601 飯咪 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-31", pay: "付全額", init: 100.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20240601 飯咪 雲鶴@0.89" },
+    { id: "pr_64", artist: "BOYNEXTDOOR", name: "20240812 蔚山音樂節 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-31", pay: "付全額", init: 300.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20240812 蔚山音樂節 雲鶴.耶比.哩嗚 @5" },
+    { id: "pr_65", artist: "BOYNEXTDOOR", name: "20241130 MMA 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-08-31", pay: "付全額", init: 300.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20241130 MMA 雲鶴.李涵.明小狗.哩嗚 @6" },
+    { id: "pr_66", artist: "BOYNEXTDOOR", name: "20231010 TMA 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-09-08", pay: "付全額", init: 320.0, supp: 0.0, deliv: "已到貨", link: "", notes: "20231010 TMA 雲鶴.李涵@4" },
+    { id: "pr_67", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 WHY線下M2U 2.0 幸運卡(校服)", cat: "官方周邊", src: "個人賣家收購", date: "2025-10-01", pay: "付全額", init: 1000.0, supp: 0.0, deliv: "已到貨", link: "", notes: "FB小夜曲" },
+    { id: "pr_68", artist: "BOYNEXTDOOR - BOYLIFE 小熊單封", name: "BOYNEXTDOOR - BOYLIFE 小熊單封", cat: "專輯", src: "個人賣家收購", date: "2025-10-01", pay: "付全額", init: 100.0, supp: 0.0, deliv: "已到貨", link: "", notes: "FB小夜曲" },
+    { id: "pr_69", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 The Action KKT 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-10-02", pay: "付全額", init: 255.0, supp: 29.0, deliv: "已到貨", link: "", notes: "FB小夜曲 Xin Xi" },
+    { id: "pr_70", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 成淏 The Action KKT 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-10-02", pay: "付全額", init: 255.0, supp: 29.0, deliv: "已到貨", link: "", notes: "FB小夜曲 Xin Xi" },
+    { id: "pr_71", artist: "BOYNEXTDOOR", name: "BiBiANG 代言香水 1.2ml體驗組", cat: "官方周邊", src: "網拍賣家代購", date: "2025-10-05", pay: "付全額", init: 180.0, supp: 143.0, deliv: "已到貨", link: "", notes: "@🫛 @872xauix KNOCKKNOCK韓國代購 780+25（FB拆售150*4）小夜曲 退款40*2" },
+    { id: "pr_72", artist: "BOYNEXTDOOR", name: "[VIDEO CALL FANSIGN] 5th EP [The Action] (Weverse Albums ver.)", cat: "專輯", src: "官方WVS", date: "2025-10-07", pay: "付全額", init: 306.0, supp: 75.0, deliv: "已到貨", link: "", notes: "Weverse Shop 小yi代收" },
+    { id: "pr_73", artist: "BOYNEXTDOOR", name: "URBANDTYPE - 拼色棉質工作外套", cat: "小門同款", src: "網拍賣家代購", date: "2025-10-09", pay: "付全額", init: 1130.0, supp: 213.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1u8qanSs1nbKVnal2x-vA3aY3Ewujwzcpjwl9iydD7Gg/edit", notes: "咪娜代購 金雲鶴同款 黑 / XS" },
+    { id: "pr_74", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 The Action MUVVE 1.0 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-10-13", pay: "付全額", init: 270.0, supp: 29.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群" },
+    { id: "pr_75", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 成淏 The Action MUVVE 1.0 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-10-13", pay: "付全額", init: 250.0, supp: 29.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群" },
+    { id: "pr_76", artist: "BOYNEXTDOOR", name: "20251101 迷你飯咪 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-10-30", pay: "付全額", init: 350.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1gvEOgrq66f3-Pwf-BP4ztgyYoOEDM_qS9XavnL_JOEs/edit?gid=1340888510#gid=1340888510", notes: "BOYNEXTDOOR 飯拍拆拆(CC) 耶比@8.75" },
+    { id: "pr_77", artist: "BOYNEXTDOOR", name: "20251101 迷你飯咪 飯拍", cat: "飯拍", src: "個人賣家收購", date: "2025-10-30", pay: "付全額", init: 350.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1gvEOgrq66f3-Pwf-BP4ztgyYoOEDM_qS9XavnL_JOEs/edit?gid=1340888510#gid=1340888510", notes: "BOYNEXTDOOR 飯拍拆拆(CC) 雲鶴@8.75" },
+    { id: "pr_78", artist: "BOYNEXTDOOR", name: "飯製生日應援", cat: "飯製周邊", src: "個人賣家收購", date: "2025-11-09", pay: "貨到付款", init: 0.0, supp: 118.0, deliv: "已到貨", link: "", notes: "《𝙒𝙊𝙊𝙉𝙃𝘼𝙆’𝙨 𝘿𝙞𝙖𝙧𝙮 ! 🧸📔♡̴⟡.˚》 IG: @1miracle_12" },
+    { id: "pr_79", artist: "BOYNEXTDOOR [WOONHAK] Photo Card Stand Set 小熊生日立牌", name: "BOYNEXTDOOR [WOONHAK] Photo Card Stand Set 小熊生日立牌", cat: "官方周邊", src: "官方WVS", date: "2025-11-21", pay: "付全額", init: 509.0, supp: 45.0, deliv: "已到貨", link: "", notes: "立牌" },
+    { id: "pr_80", artist: "BOYNEXTDOOR [WOONHAK] Photo Card Set 小熊生日小卡", name: "BOYNEXTDOOR [WOONHAK] Photo Card Set 小熊生日小卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-11-21", pay: "貨到付款", init: 239.0, supp: 29.0, deliv: "已到貨", link: "", notes: "MOMO" },
+    { id: "pr_81", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR -Cushion-CATBBI", cat: "官方周邊", src: "網拍賣家代購", date: "2025-11-23", pay: "付全額", init: 1020.0, supp: 120.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1Zs5rfB5LgtKUEfMZ1fXvqcOfSG5UpUgX_SFXDWfds4c/edit?gid=1057699584#gid=1057699584", notes: "" },
+    { id: "pr_82", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR -Cushion-WOONBABY", cat: "官方周邊", src: "官方WVS", date: "2025-11-28", pay: "付全額", init: 913.0, supp: 120.0, deliv: "已到貨", link: "", notes: "Weverse Shop 小yi代收" },
+    { id: "pr_83", artist: "BOYNEXTDOOR", name: "BBNEXDO 台北聖誕快閃 限定筆", cat: "官方周邊", src: "實體門市", date: "2025-12-13", pay: "現金", init: 80.0, supp: 0.0, deliv: "已到貨", link: "", notes: "CATBBI" },
+    { id: "pr_84", artist: "BOYNEXTDOOR", name: "阿ㄈ贈送卡包卡", cat: "官方周邊", src: "親友贈送", date: "2026-02-23", pay: "現金", init: 0.0, supp: 38.0, deliv: "已到貨", link: "", notes: "阿ㄈ送的" },
+    { id: "pr_85", artist: "BOYNEXTDOOR-WEGO聯名大學踢（M；白） 重購", name: "BOYNEXTDOOR-WEGO聯名大學踢（M；白） 重購", cat: "官方周邊", src: "網拍賣家代購", date: "2026-02-15", pay: "付全額", init: 634.0, supp: 9.0, deliv: "已到貨", link: "", notes: "煤爐重買" },
+    { id: "pr_86", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP(阿柔)", cat: "官方周邊", src: "官方WVS", date: "2026-05-15", pay: "付全額", init: 506.0, supp: -7.0, deliv: "已到貨", link: "", notes: "富邦J卡 BR501192593" },
+    { id: "pr_87", artist: "BOYNEXTDOOR", name: "1st Studio Album [HOME] (Weverse Albums ver.) (Random)", cat: "專輯", src: "個人賣家收購", date: "2026-06-23", pay: "貨到付款", init: 100.0, supp: 38.0, deliv: "已到貨", link: "", notes: "FB小夜曲 Lucky Riwoo" },
+    { id: "pr_88", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 成淏 HOME Ｏlive Young 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2026-05-27", pay: "付全額", init: 275.0, supp: 14.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1mMapac5uzyxbPvqilgeu-5EfnAdvZ3SFoT7DNwYP4uI/edit?gid=660163147#gid=660163147", notes: "FB小夜曲Maru Yuan/社群 BND小卡拆拆/原275改260內退15" },
+    { id: "pr_89", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR 雲鶴 HOME Ｏlive Young 特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2026-05-27", pay: "付全額", init: 275.0, supp: 14.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1mMapac5uzyxbPvqilgeu-5EfnAdvZ3SFoT7DNwYP4uI/edit?gid=660163147#gid=660163147", notes: "FB小夜曲Maru Yuan/社群 BND小卡拆拆/原275改260內退15" },
+    { id: "pr_90", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP", cat: "官方周邊", src: "官方WVS", date: "2026-06-24", pay: "付全額", init: 502.0, supp: -127.0, deliv: "已到貨", link: "", notes: "GOGO卡 22727-5750KRW BR267094671" },
+    { id: "pr_91", artist: "BOYNEXTDOOR", name: "BBNEXDO上學去系列娃衣（不含娃） 一代雲寶貝幼稚園套裝", cat: "飯製周邊", src: "個人賣家收購", date: "2026-06-26", pay: "貨到付款", init: 200.0, supp: 19.0, deliv: "已到貨", link: "", notes: "傑西" },
+    { id: "pr_92", artist: "BOYNEXTDOOR", name: "BBNEXDO 二代娃 初丁系列（不含娃）🏫初丁三件組（背包款式隨機出）", cat: "飯製周邊", src: "個人賣家收購", date: "2026-06-26", pay: "貨到付款", init: 400.0, supp: 19.0, deliv: "已到貨", link: "", notes: "傑西" },
+    { id: "pr_93", artist: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]INSTANT PHOTO CARD", name: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]INSTANT PHOTO CARD", cat: "官方周邊", src: "官方WVS", date: "2026-07-23", pay: "付全額", init: 264.0, supp: 22.5, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0", notes: "600*2 @4.548 小雞代收" },
+    { id: "pr_94", artist: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]MINI IMAGE PICKET KEYRING", name: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]MINI IMAGE PICKET KEYRING", cat: "官方周邊", src: "官方WVS", date: "2026-07-23", pay: "付全額", init: 396.0, supp: 22.5, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0", notes: "900*2 @4.548 小雞代收" },
+    { id: "pr_95", artist: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]BIG PHOTO SLOGAN", name: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]BIG PHOTO SLOGAN", cat: "官方周邊", src: "官方WVS", date: "2026-07-23", pay: "付全額", init: 615.0, supp: 22.5, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0", notes: "2800 @4.548 小雞代收" },
+    { id: "pr_96", artist: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]PHOTO CARD HOLDER", name: "BOYNEXTDOOR [KNOCK ON Vol.2 IN JAPAN]PHOTO CARD HOLDER", cat: "官方周邊", src: "官方WVS", date: "2026-07-23", pay: "付全額", init: 440.0, supp: 22.5, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0", notes: "2000 @4.548 小雞代收" },
+    { id: "pr_97", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR TOUR 'KNOCK ON Vol.2' IN TAIPEI卡套應援", cat: "飯製周邊", src: "網拍賣家代購", date: "2026-08-12", pay: "付全額", init: 4204.0, supp: 63.0, deliv: "已到貨", link: "", notes: "淘寶" },
+    { id: "pr_98", artist: "BOYNEXTDOOR", name: "BBNEXDO 台北聖誕快閃 限定筆", cat: "官方周邊", src: "個人賣家收購", date: "2026-09-03", pay: "貨到付款", init: 80.0, supp: 38.0, deliv: "已到貨", link: "", notes: "WOONBABY 莎瑪" },
+    { id: "pr_99", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR OFFICIAL LIGHT STICK KEYRING Cover", cat: "官方周邊", src: "個人賣家收購", date: "2026-09-30", pay: "貨到付款", init: 490.0, supp: 0.0, deliv: "已到貨", link: "", notes: "CATBBI" },
+    { id: "pr_100", artist: "BOYNEXTDOOR", name: "Weverse Jelly*60", cat: "官方周邊", src: "官方WVS", date: "2026-10-01", pay: "付全額", init: 425.0, supp: 0.0, deliv: "已到貨", link: "", notes: "" },
+    { id: "pr_101", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR sweet home Plush Keyring", cat: "官方周邊", src: "個人賣家收購", date: "2026-10-23", pay: "付全額", init: 1530.0, supp: 0.0, deliv: "未到貨", link: "https://docs.google.com/spreadsheets/d/1ifIIxhYp6wcMFvvjd-X5fjlzLGIg3lkajlP-L0MGCHA/edit?gid=0#gid=0", notes: "昕寶 拆*CATBBI/WOONBABY" }
+  ],
+  ov: [
+    { id: "ov_1", date: "2024-05-13", artist: "(G)I-DLE", name: "葉舒華泡泡", cat: "泡泡", amount: 170.0, deliv: "已到貨", link: "" },
+    { id: "ov_2", date: "2024-05-13", artist: "(G)I-DLE", name: "宋雨琦泡泡", cat: "泡泡", amount: 170.0, deliv: "已到貨", link: "" },
+    { id: "ov_3", date: "2024-06-03", artist: "&TEAM", name: "王奕翔泡泡", cat: "泡泡", amount: 60.0, deliv: "已到貨", link: "" },
+    { id: "ov_4", date: "2024-09-13", artist: "TWICE", name: "abouTzu", cat: "專輯", amount: 345.0, deliv: "已到貨", link: "" },
+    { id: "ov_5", date: "2024-09-14", artist: "NCT 127", name: "Be There For Me", cat: "專輯", amount: 100.0, deliv: "已到貨", link: "" },
+    { id: "ov_6", date: "2024-09-24", artist: "CNBLUE", name: "手燈", cat: "周邊", amount: 1383.0, deliv: "已到貨", link: "" },
+    { id: "ov_7", date: "2024-09-29", artist: "FTIsland", name: "SERIOUS", cat: "專輯", amount: 520.0, deliv: "已到貨", link: "" },
+    { id: "ov_8", date: "2024-09-29", artist: "(G)I-DLE", name: "I SWAY", cat: "專輯", amount: 460.0, deliv: "已到貨", link: "" },
+    { id: "ov_9", date: "2024-11-16", artist: "CNBLUE", name: "X", cat: "專輯", amount: 260.0, deliv: "已到貨", link: "" },
+    { id: "ov_10", date: "2024-12-17", artist: "通用", name: "手燈電池", cat: "周邊", amount: 410.0, deliv: "已到貨", link: "" },
+    { id: "ov_11", date: "2025-08-03", artist: "CNBLUE", name: "FNC BKD小卡", cat: "周邊", amount: 400.0, deliv: "已到貨", link: "" },
+    { id: "ov_12", date: "2025-08-15", artist: "AxMxP", name: "FNC BKD小卡", cat: "周邊", amount: 119.0, deliv: "已到貨", link: "" },
+    { id: "ov_13", date: "2025-08-15", artist: "Hi-Fi Un!corn", name: "FNC BKD小卡", cat: "周邊", amount: 119.0, deliv: "已到貨", link: "" },
+    { id: "ov_14", date: "2025-08-27", artist: "AxMxP", name: "[Signed] AxMxP - 1st ALBUM : AxMxP (P ver.)(Random)", cat: "專輯", amount: 548.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/1ehiCsOTnu3oXWm6v68N5tOjFkclbOEetI4XSCi5ClUc/edit?gid=0#gid=0" }
+  ],
+  tp: [
+    { id: "tp_1", artist: "BOYNEXTDOOR", title: "20241213-1215仁川", dest: "韓國仁川", start: "2024-12-13", end: "2024-12-15", notes: "年度計算以 $22,512 為準，總花費 $28,617", annual_override: 22512 },
+    { id: "tp_2", artist: "BOYNEXTDOOR", title: "20250315 新加坡", dest: "新加坡", start: "2025-03-15", end: "2025-03-16", notes: "總計 $17,089", annual_override: 17089 },
+    { id: "tp_3", artist: "BOYNEXTDOOR", title: "20250726-28首爾", dest: "韓國首爾", start: "2025-07-26", end: "2025-07-28", notes: "總計 $21,611", annual_override: 21611 },
+    { id: "tp_4", artist: "BOYNEXTDOOR", title: "20260718-19 首爾", dest: "韓國首爾", start: "2026-07-18", end: "2026-07-19", notes: "總計 $26,134", annual_override: 26134 }
+  ],
+  te: [
+    { id: "te_1", pid: "tp_1", date: "2024-10-23", item: "VIP門票", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 4723.0, twd: 4723.0, notes: "J卡" },
+    { id: "te_2", pid: "tp_1", date: "2024-10-23", item: "機票", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 8699.0, twd: 8699.0, notes: "FLYGO卡" },
+    { id: "te_3", pid: "tp_1", date: "2024-11-01", item: "仁川西雅圖飯店", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 4489.0, twd: 4489.0, notes: "J卡" },
+    { id: "te_4", pid: "tp_1", date: "2024-12-13", item: "換匯12萬韓元", cat: "合理必要支出", pay: "現金", cur: "台幣", orig: 2984.0, twd: 2984.0, notes: "" },
+    { id: "te_5", pid: "tp_1", date: "2024-12-13", item: "到場館交通", cat: "合理必要支出", pay: "現金", cur: "台幣", orig: 315.0, twd: 315.0, notes: "" },
+    { id: "te_6", pid: "tp_1", date: "2025-01-08", item: "機票", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 9309.0, twd: 9309.0, notes: "玉山Ubear" },
+    { id: "te_7", pid: "tp_2", date: "2025-01-06", item: "門票", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 5377.0, twd: 5377.0, notes: "flygo" },
+    { id: "te_8", pid: "tp_2", date: "2025-03-15", item: "換新幣100", cat: "合理必要支出", pay: "現金", cur: "台幣", orig: 2455.0, twd: 2455.0, notes: "" },
+    { id: "te_9", pid: "tp_3", date: "2025-06-05", item: "韓安7/27門票", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 3663.0, twd: 3663.0, notes: "" },
+    { id: "te_10", pid: "tp_3", date: "2025-07-04", item: "機票", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 9386.0, twd: 9386.0, notes: "GOGO卡分五期" },
+    { id: "te_11", pid: "tp_3", date: "2025-07-26", item: "住宿", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 1903.0, twd: 1903.0, notes: "" },
+    { id: "te_12", pid: "tp_4", date: "2026-05-16", item: "WOWPASS儲值5萬", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 1093.0, twd: 1093.0, notes: "富邦J卡" },
+    { id: "te_13", pid: "tp_4", date: "2026-06-08", item: "門票錢", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 3561.0, twd: 3561.0, notes: "回饋108" },
+    { id: "te_14", pid: "tp_4", date: "2026-06-25", item: "易遊網機票", cat: "合理必要支出", pay: "信用卡", cur: "台幣", orig: 8099.0, twd: 8099.0, notes: "富邦J卡" },
+    { id: "te_15", pid: "tp_4", date: "2026-07-08", item: "DAY2門票", cat: "演唱會相關", pay: "信用卡", cur: "台幣", orig: 3360.0, twd: 3360.0, notes: "NAMANE" }
+  ],
+  fs: [
+    { id: "fs_1", date: "2024-12-14", group: "BOYNEXTDOOR", member: "朴成淏", notes: "他對我比愛心阿阿阿阿阿", photo: "", event_id: "ev_6" },
+    { id: "fs_2", date: "2025-03-15", group: "BOYNEXTDOOR", member: "金雲鶴", notes: "他看著我這邊說下次見", photo: "", event_id: "ev_11" },
+    { id: "fs_3", date: "2025-04-03", group: "BOYNEXTDOOR", member: "朴成淏", notes: "我跟耶比擊掌了...", photo: "", event_id: "ev_12" }
+  ]
+};
+
+try {
+  const s = JSON.parse(localStorage.getItem('fanhome_v3') || 'null');
+  if (s && s.cfg && s.ev && s.ev.length >= 35) {
+    D = s;
+    if (!D.yearly) D.yearly = {};
+  }
+} catch (e) {}
+
+const save = () => {
+  try {
+    localStorage.setItem('fanhome_v3', JSON.stringify(D));
+    if (GAS_API_URL) {
+      fetch(GAS_API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(D)
+      }).catch(err => console.log('雲端回寫中...'));
+    }
+  } catch (e) {}
+};
+
+let room = 'home', mode = 'auto', tab = 'pr', tp = null, sv = 'A', min = false, histYear = '2026';
+let simDateOverride = ''; // 供跨年測試用
+
+const getActiveDate = () => simDateOverride || TODAY;
+const getActiveYear = () => {
+  const dt = getActiveDate();
+  const yr = dt.slice(0, 4);
+  const mo = +dt.slice(5, 7);
+  // 若為 11～12月，且隔年有預存資料，且尚未到 1/1，首頁計算與顯示仍使用當年
+  return yr;
+};
+
+const sum = (a, f) => a.reduce((s, x) => s + (+f(x) || 0), 0);
+const tot = x => (+x.init || 0) + (+x.supp || 0);
+const tourSum = p => p.annual_override ? p.annual_override : sum(D.te.filter(e => e.pid === p.id), e => e.twd);
+const isOverseasEvent = e => Boolean(e.tour_id || (/INSPIRE|KSPO|SEOUL|SINGAPORE|INCHEON/i.test(`${e.venue} ${e.name}`) && !/威秀|TAIPEI|KAOHSIUNG|TAOYUAN/i.test(`${e.venue} ${e.name}`)));
+
+function getActiveConfig() {
+  const dt = getActiveDate();
+  const yr = dt.slice(0, 4);
+  const mo = +dt.slice(5, 7);
+  const nextYr = String(+yr + 1);
+  // 若為 11-12月，且 D.yearly[nextYr] 存在，使用者在非跨年測試或預填檢視時可切換
+  if (mo >= 11 && D.yearly && D.yearly[nextYr] && simDateOverride.startsWith(nextYr)) {
+    return D.yearly[nextYr];
+  }
+  return D.cfg;
+}
+
+function calc() {
+  const dt = getActiveDate();
+  const yr = dt.slice(0, 4);
+  const cf = getActiveConfig();
+
+  const y = d => (d || '').startsWith(yr);
+  const evY = D.ev.filter(e => y(e.date));
+  const tpY = D.tp.filter(p => y(p.start));
+  const prY = D.pr.filter(p => y(p.date));
+  const ovY = D.ov.filter(o => y(o.date));
+
+  const tix = sum(evY, e => e.price) + sum(tpY, p => sum(D.te.filter(e => e.pid === p.id && e.item.includes('門票')), e => e.twd));
+  const evT = sum(evY, e => e.price);
+  const tourT = sum(tpY, tourSum);
+  const merch = sum(prY, tot) + sum(ovY, o => o.amount);
+  const spent = evT + tourT + merch;
+
+  const avg = cf.target || 2420;
+  const total = cf.conc - spent;
+  const res2026 = evY.filter(e => e.must === '是' && e.date > dt);
+  const resT2026 = sum(res2026, e => e.est);
+  const free = total - resT2026;
+  const unseen = evY.filter(e => e.date > dt).length;
+  const mk = dt.slice(0, 7);
+  const cnt = Math.max(0, Math.floor(free / avg));
+
+  return {
+    tix, res: res2026, resT: resT2026, merch, avg, free, spent, evT, tourT,
+    seen: evY.filter(e => e.date <= dt && e.price > 0).length, unseen,
+    mrem: cf.merch - merch,
+    total,
+    cnt,
+    tpY, prY, ovY, evY
+  };
+}
+
+function bars(l, u, isArtist = false, isAsset = false) {
+  const m = Math.max(1, ...l.map(x => x[1]));
+  return l.map(x => `
+    <div style="margin:9px 0;${isArtist ? 'cursor:pointer;' : ''}" ${isArtist ? `onclick="${isAsset ? `showArtistAssetDetail('${x[0]}')` : `showArtistDetail('${x[0]}')`}"` : ''}>
+      <div style="display:flex;justify-content:space-between;font-size:14px">
+        <span>${isArtist ? '🎀 ' : ''}${x[0]} ${isArtist ? '<small style="color:var(--soft);font-size:12px">（點擊看明細 ➔）</small>' : ''}</span>
+        <b>${u(x[1])}</b>
+      </div>
+      <div class="bar" style="margin:3px 0"><i style="width:${x[1] / m * 100}%"></i></div>
+    </div>`).join('') || '<div style="color:var(--soft)">無資料</div>';
+}
+const cntBy = (a, f) => Object.entries(a.reduce((m, x) => (m[f(x)] = (m[f(x)] || 0) + 1, m), {})).sort((x, y) => y[1] - x[1]);
+
+function bcard(t, rem, tot) {
+  let r = rem / tot, s = r <= .03 ? 'danger' : r <= .1 ? 'warning' : 'normal';
+  if (mode !== 'auto') s = mode;
+  const l = { normal: '充裕 🌸', warning: '預警 🍓', danger: '超標 ⚠' }[s];
+  return `
+    <div class="card lk ${s}" onclick="go('ledger')">
+      <span class="tape"></span>
+      <h2>${t} <span class="badge">${l}</span></h2>
+      <div class="big">${fmt(rem)}</div>
+      <div class="bar"><i style="width:${Math.max(0, Math.min(100, r * 100))}%"></i></div>
+    </div>`;
+}
+
+function getCoverEl(e, ic) {
+  const imgUrl = resolveDriveImg(e.ticket || e.photo);
+  if (imgUrl) {
+    return `<div class="cover"><img src="${imgUrl}" onerror="this.onerror=null;this.parentNode.innerHTML='${ic}';"></div>`;
+  }
+  return `<div class="cover">${ic}</div>`;
+}
+
+const rowH = (k, x, ic, t, s, r, extraHtml='') => `
+  <div class="row" onclick="openM('${k}','${x.id}')">
+    ${getCoverEl(x, ic)}
+    <div class="grow">
+      <b>${t}</b>
+      <div style="font-size:13px;color:var(--soft)">${s}</div>
+      ${extraHtml}
+    </div>
+    <div>${r}</div>
+  </div>`;
+const addB = (k, x) => `<button class="btn" onclick="openM('${k}',null,${x ? `{pid:'${x}'}` : '{}'})">＋ 新增</button>`;
+
+const V = {
+  home() {
+    const dt = getActiveDate();
+    const yr = dt.slice(0, 4);
+    const mo = +dt.slice(5, 7);
+    const nextYr = String(+yr + 1);
+    const cf = getActiveConfig();
+    const c = calc();
+    const f = D.fort;
+    const isNovDec = mo >= 11;
+    const hasNextYr = D.yearly && D.yearly[nextYr];
+
+    return `
+      <!-- 跨年測試與日期模擬小列 -->
+      <div class="sim-bar">
+        <span>📅 目前系統日期：<b>${dt}</b></span>
+        <div style="display:flex;gap:4px">
+          <button class="${simDateOverride===''?'on':''}" onclick="simDateOverride='';go('home')">真實今天</button>
+          <button class="${simDateOverride==='2026-11-06'?'on':''}" onclick="simDateOverride='2026-11-06';go('home')">2026/11/06</button>
+          <button class="${simDateOverride==='2026-12-15'?'on':''}" onclick="simDateOverride='2026-12-15';go('home')">2026/12/15 (預填)</button>
+          <button class="${simDateOverride==='2027-01-01'?'on':''}" onclick="simDateOverride='2027-01-01';go('home')">2027/01/01 (跨年)</button>
+        </div>
+      </div>
+
+      <!-- 月老籤詩獨立區塊 -->
+      <div class="card" style="background:var(--accent-pink)">
+        <span class="tape" style="background:var(--tape-color-alt)"></span>
+        <h2>🏮 ${yr} 月老籤詩 <span class="badge" style="background:#ffd9e4;color:#7a374c">${f.locked ? '🔒 已鎖定' : isNovDec ? '開放填寫中' : '非開放期間'}</span></h2>
+        ${f.locked ? `
+          <p style="margin:6px 0;font-size:16px"><b>${f.no}</b>・${f.text}</p>
+          <p style="margin:6px 0;font-size:15px;color:var(--accent-pink-text)"><b>運勢：</b>${f.sum}</p>
+          <div style="text-align:right;margin-top:6px"><a href="#" style="font-size:12px;color:var(--soft);text-decoration:none" onclick="D.fort.locked=false;save();go('home');return false">（解鎖設定）</a></div>
+        ` : isNovDec ? `
+          <label>🏮 快速選擇霞海城隍廟月老籤號（自動填寫籤詩與運勢）</label>
+          <select id="fno_sel" onchange="onPoemSelect(this.value)">
+            <option value="">-- 請選擇籤號 --</option>
+            ${Object.keys(POEMS).map(k => `<option value="${k}" ${k===f.no?'selected':''}>${k}</option>`).join('')}
+          </select>
+          <label>籤號</label><input id="fno" value="${f.no}">
+          <label>籤詩全文</label><textarea id="ftx" rows="3">${f.text}</textarea>
+          <label>運勢一句話解析</label><textarea id="fsum" rows="2">${f.sum}</textarea>
+          <label>${yr} 追星總預算</label><input id="b1" type="number" value="${cf.conc}">
+          <label>${yr} 周邊總預算</label><input id="b2" type="number" value="${cf.merch}">
+          <label>${yr} 每月娛樂費</label><input id="b3" type="number" value="${cf.month}">
+          <div class="acts">
+            <button class="btn" onclick="const nc={conc:+$('#b1').value,merch:+$('#b2').value,month:+$('#b3').value,target:2420};if(simDateOverride.startsWith('${nextYr}')) { if(!D.yearly)D.yearly={}; D.yearly['${nextYr}']=nc; } else { D.cfg=nc; } D.fort={no:$('#fno').value,text:$('#ftx').value,sum:$('#fsum').value,locked:true};save();go('home')">確認送出並鎖定</button>
+          </div>
+        ` : '<div style="color:var(--soft)">目前非開放填寫時段。</div>'}
+
+        ${isNovDec && !simDateOverride.startsWith(nextYr) ? `
+          <div class="next-yr-box">
+            <div style="font-weight:700;color:var(--accent-pink-text);margin-bottom:4px">🌱 跨年預先填寫區（${nextYr} 年度）</div>
+            <div style="font-size:13px;color:var(--soft);margin-bottom:8px">${hasNextYr ? `✓ 已預存 ${nextYr} 年度預算與籤詩（將於 ${nextYr}/01/01 自動生效）` : `您可以在 11～12 月提前規劃與預填 ${nextYr} 年度的預算與目標。`}</div>
+            <button class="btn" style="padding:6px 14px;font-size:13px" onclick="simDateOverride='${nextYr}-01-01';go('home')">＋ 預先填寫 ${nextYr} 年度資料</button>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="budget-strip">
+        <span>🌸 追星總預算：<b>${fmt(cf.conc)}</b></span>
+        <span>🎀 周邊總預算：<b>${fmt(cf.merch)}</b></span>
+        <span>☕ 每月娛樂費：<b>${fmt(cf.month)}</b></span>
+      </div>
+
+      <div class="grid">
+        ${bcard(`🎫 隨心所欲預算 (${yr})`, c.free, cf.conc)}
+        ${bcard(`🧸 剩餘周邊預算 (${yr})`, c.mrem, cf.merch)}
+      </div>
+
+      <div class="card lk" onclick="go('ledger')">
+        <span class="tape right"></span>
+        <h2>🔢 場次推算 (${yr})</h2>
+        <div>今年未看場次：<b>${c.unseen} 場</b></div>
+        <div>預估還能看：<b>${c.cnt}</b> 場（平均單場 <b>${fmt(c.avg)}</b>）</div>
+        ${c.avg > cf.target ? `<div class="flag">⚑ 高於理想單場預算 ${fmt(cf.target)}</div>` : ''}
+      </div>
+    `;
+  },
+
+  events() {
+    return `
+      <div class="card">
+        <span class="tape"></span>
+        <h2>📚 成果發表會 (${D.ev.length} 場) ${addB('ev')}</h2>
+        ${[...D.ev].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(e=>{
+          const matchedFs = D.fs.find(f => f.event_id === e.id || f.date === e.date);
+          const matchedTour = D.tp.find(t => t.id === e.tour_id || e.notes.includes('外站'));
+          let extra = '';
+          if (matchedFs) {
+            extra += `<span class="cross-link" onclick="event.stopPropagation();go('wall');">💌 飯撒回憶：${matchedFs.member} (${matchedFs.notes.slice(0, 10)}...)</span>`;
+          }
+          if (matchedTour) {
+            extra += `<span class="cross-link" style="background:#eaf5fc;color:#2c5b96;border-color:#b4d2f7" onclick="event.stopPropagation();tp='${matchedTour.id}';go('tour');">✈️ 外站專案：${matchedTour.title}</span>`;
+          }
+          return rowH('ev', e, e.recap ? '📸' : e.ticket ? '🎟️' : e.must==='is' ? '🔖' : '🎀', e.name, `${e.date}・${e.artist}・${e.venue}・${e.seat}`, e.must==='是'&&e.date>getActiveDate() ? `<span class="badge">預留 ${fmt(e.est)}</span>` : fmt(e.price), extra);
+        }).join('')||'<div style="color:var(--soft)">無紀錄</div>'}
+      </div>`;
+  },
+
+  merch() {
+    const t = tab === 'pr';
+    return `
+      <div class="tabs">
+        <button class="${t?'on':''}" onclick="tab='pr';go('merch')">資助小門紀錄 🧸</button>
+        <button class="${t?'':'on'}" onclick="tab='ov';go('merch')">愛心氾濫紀錄 💗</button>
+      </div>
+      <div class="card">
+        <span class="tape"></span>
+        <h2>${t?'資助小門紀錄':'愛心氾濫紀錄'} ${addB(tab)}</h2>
+        ${t ? [...D.pr].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p => {
+          const extra = p.link ? `<a href="${p.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
+          return rowH('pr', p, '🧸', `${p.artist}・${p.name}`, `${p.src}・${p.pay}・${p.deliv}`, fmt(tot(p)), extra);
+        }).join('') : [...D.ov].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(o => {
+          const extra = o.link ? `<a href="${o.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
+          return rowH('ov', o, '💗', `${o.artist}・${o.name}`, `${o.date}・${o.deliv}`, fmt(o.amount), extra);
+        }).join('')}
+        <div style="margin-top:12px;text-align:right;font-weight:700;color:#2b6c96">合計 ${fmt(t?sum(D.pr,tot):sum(D.ov,o=>o.amount))}</div>
+      </div>`;
+  },
+
+  tour() {
+    if (tp) {
+      const p = D.tp.find(x => x.id === tp);
+      if (!p) { tp = null; return V.tour(); }
+      const es = D.te.filter(e => e.pid === p.id);
+      const linkedEvents = D.ev.filter(e => e.tour_id === p.id || (e.date >= p.start && e.date <= p.end));
+      return `
+        <button class="pill" onclick="tp=null;go('tour')">← 回專案列表</button>
+        <div class="card" style="margin-top:14px">
+          <span class="tape"></span>
+          <h2>🧳 ${p.title} <span class="badge">${p.artist}</span></h2>
+          <div class="big">${fmt(tourSum(p))}</div>
+          <div>${p.dest}・${p.start}～${p.end}</div>
+          ${linkedEvents.length ? `<div style="margin-top:6px">${linkedEvents.map(le=>`<span class="cross-link" onclick="openM('ev','${le.id}')">📚 關聯場次：${le.name} (${le.seat})</span>`).join(' ')}</div>` : ''}
+          ${p.notes ? `<div style="font-size:13px;color:var(--soft);margin-top:6px">${p.notes}</div>` : ''}
+          <div class="acts"><button class="btn g" onclick="openM('tp','${p.id}')">編輯專案</button></div>
+        </div>
+        <div class="card">
+          <h2>花費明細 (${es.length} 筆) ${addB('te',p.id)}</h2>
+          ${[...es].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(e=>rowH('te',e,'🧾',e.item,`${e.date}・${e.cat}・${e.pay}`,fmt(e.twd)))||'<div style="color:var(--soft)">無花費明細</div>'}
+        </div>`;
+    }
+    return `
+      <div class="card">
+        <span class="tape"></span>
+        <h2>🧳 行李箱・海外遠征 ${addB('tp')}</h2>
+        ${[...D.tp].sort((a, b) => (b.start || '').localeCompare(a.start || '')).map(p=>`
+          <div class="row" onclick="tp='${p.id}';go('tour')">
+            <div class="cover">✈️</div>
+            <div class="grow"><b>${p.title}</b><div style="font-size:13px;color:var(--soft)">${p.artist}・${p.dest}</div></div>
+            <div>${fmt(tourSum(p))}</div>
+          </div>`).join('')}
+      </div>`;
+  },
+
+  wall() {
+    const mem = cntBy(D.fs, f => f.member).map(x => [x[0], x[1]]);
+    return `
+      <div class="card">
+        <span class="tape"></span>
+        <h2>🖼️ 相片牆・飯撒紀錄 (${D.fs.length} 筆) ${addB('fs')}</h2>
+        ${[...D.fs].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(f=>{
+          const linkedEvent = D.ev.find(e => e.id === f.event_id || e.date === f.date);
+          const linkBtn = linkedEvent ? `<span class="cross-link" onclick="event.stopPropagation();openM('ev','${linkedEvent.id}')">📚 發生於：${linkedEvent.name}</span>` : '';
+          return rowH('fs', f, f.photo ? '📷' : '💙', f.member, `${f.group}・${f.date}・${f.notes}`, '', linkBtn);
+        }).join('')}
+      </div>
+      <div class="card">
+        <span class="tape right"></span>
+        <h2>💙 飯撒次數排行</h2>
+        ${bars(mem, v => v + ' 次', false, false)}
+      </div>`;
+  },
+
+  ledger() {
+    const dt = getActiveDate();
+    const yr = dt.slice(0, 4);
+    const cf = getActiveConfig();
+    const c = calc();
+    const curMonth = 11;
+    const monthAvg = c.evT / curMonth;
+    const isOver = monthAvg > 4000;
+    const good = !isOver;
+
+    const ySel = d => (d || '').startsWith(histYear);
+    const evH = D.ev.filter(e => ySel(e.date));
+    const tpH = D.tp.filter(p => ySel(p.start));
+    const prH = D.pr.filter(p => ySel(p.date));
+    const ovH = D.ov.filter(o => ySel(o.date));
+
+    const evH_T = sum(evH.filter(e => !isOverseasEvent(e)), e => e.price);
+    const tpH_T = sum(tpH, tourSum) + sum(evH.filter(e => isOverseasEvent(e)), e => e.price);
+    const merchH_T = (histYear === '2026') ? 11544 : (sum(prH, tot) + sum(ovH, o => o.amount));
+    const totalH = evH_T + tpH_T + merchH_T;
+
+    const aH = [
+      ['台灣演唱會／活動', evH_T],
+      ['國外演唱會（外站專案）', tpH_T],
+      ['周邊（小門＋氾濫）', merchH_T]
+    ];
+
+    const bMap = { 'BOYNEXTDOOR': 0, 'CNBLUE': 0, '李茂珍': 0, '其他': 0 };
+    evH.forEach(e => { bMap[normArtist(e.artist, e.name)] += (+e.price || 0); });
+    tpH.forEach(p => { bMap[normArtist(p.artist, p.title)] += tourSum(p); });
+    if (histYear === '2026') {
+      bMap['BOYNEXTDOOR'] += 11544;
+    } else {
+      prH.forEach(p => { bMap[normArtist(p.artist, p.name)] += tot(p); });
+      ovH.forEach(o => { bMap[normArtist(o.artist, o.name)] += (+o.amount || 0); });
+    }
+    const bH = Object.entries(bMap).sort((x, y) => y[1] - x[1]);
+    const LH = sv === 'A' ? aH : bH;
+
+    const all = { 'BOYNEXTDOOR': 0, 'CNBLUE': 0, '李茂珍': 0, '其他': 0 };
+    const pay = { 'BOYNEXTDOOR': 0, 'CNBLUE': 0, '李茂珍': 0, '其他': 0 };
+    D.ev.forEach(e => {
+      const a = normArtist(e.artist, e.name);
+      all[a] = (all[a] || 0) + 1;
+      pay[a] = (pay[a] || 0) + (+e.price || 0);
+    });
+    D.pr.forEach(p => {
+      const a = normArtist(p.artist, p.name);
+      pay[a] = (pay[a] || 0) + tot(p);
+    });
+    D.ov.forEach(o => {
+      const a = normArtist(o.artist, o.name);
+      pay[a] = (pay[a] || 0) + (+o.amount || 0);
+    });
+    D.tp.forEach(p => {
+      const a = normArtist(p.artist, p.title);
+      pay[a] = (pay[a] || 0) + tourSum(p);
+    });
+
+    const kv = (t, v, s) => `<div class="kv"><span>${t}${s?`<small style="display:block;color:var(--soft);font-size:12px">${s}</small>`:''}</span><b>${v}</b></div>`;
+
+    return `
+      <div class="card">
+        <span class="tape"></span>
+        <h2>📒 ${yr} 年度核算結果</h2>
+        ${kv('今年已花費', fmt(c.spent), `活動 ${fmt(c.evT)} ＋ 外站 ${fmt(c.tourT)} ＋ 周邊 ${fmt(c.merch)}`)}
+        ${kv('目前已看', c.seen + ' 場')}
+        ${kv('平均單場花費', fmt(c.avg), `以台灣場門票計算 ($29,045 ÷ 12 場)`)}
+        ${kv('控管狀況', good ? '<span class="ok">✓ 正常 🌸</span>' : '<span class="no">✗ 超標 🍓</span>', `活動門票均月花費 ${fmt(monthAvg)} / 上限 $4,000`)}
+        ${kv('總剩餘預算', fmt(c.total), `${fmt(cf.conc)}－已花費 ${fmt(c.spent)}`)}
+        ${kv('隨心所欲剩餘額度', fmt(c.free), `總剩餘預算 ${fmt(c.total)}－預留款 $0`)}
+        ${kv('剩餘預算推算可看', `<span style="font-size:24px;color:#2b6c96">${c.cnt}</span> 場`, `ROUNDDOWN(3277 ÷ 2420, 0)`)}
+      </div>
+
+      <div class="card">
+        <h2>🔖 預留款項活動</h2>
+        ${D.ev.filter(e => e.must === '是' && e.date.startsWith(yr) && e.date > dt).map(e => rowH('ev', e, '🔖', e.name, `${e.date}・${e.venue}`, fmt(e.est))).join('') || `<div style="color:var(--soft)">${yr}年目前已無預留款項活動</div>`}
+        <div class="kv" style="margin-top:8px"><span>預留款合計</span><b>${fmt(c.resT)}</b></div>
+      </div>
+
+      <!-- 歷年全年總花費與雙重視角 -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <h2 style="margin:0">📊 歷年全年總花費</h2>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:14px;color:var(--soft)">切換年份：</span>
+            <select id="hist_yr" style="width:auto;padding:4px 10px;border-radius:10px" onchange="histYear=this.value;go('ledger')">
+              ${['2024', '2025', '2026', '2027'].map(y => `<option value="${y}" ${y===histYear?'selected':''}>${y} 年度</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="${sv==='A'?'on':''}" onclick="sv='A';go('ledger')">支出型態 📊</button>
+          <button class="${sv==='B'?'on':''}" onclick="sv='B';go('ledger')">藝人歸屬 🎀</button>
+        </div>
+        ${LH.map(x => kv(x[0], fmt(x[1]))).join('')}
+        ${kv('總計', fmt(totalH))}
+      </div>
+
+      <div class="card">
+        <h2>🏆 參戰場次排行</h2>
+        ${bars(Object.entries(all).sort((x,y)=>y[1]-x[1]), v => v + ' 場', true, false)}
+      </div>
+
+      <div class="card">
+        <h2>💰 累積資助金額排行</h2>
+        ${bars(Object.entries(pay).sort((x,y)=>y[1]-x[1]), fmt, true, true)}
+      </div>
+
+      <div class="card">
+        <h2>📦 備份操作</h2>
+        <button class="pill" onclick="exportExcel()">匯出 EXCEL 活頁簿 📊</button>
+        <button class="pill" onclick="exportData()">匯出備份 JSON 💌</button>
+        <button class="pill" onclick="localStorage.removeItem('fanhome_v3');location.reload()">還原原始匯入資料</button>
+      </div>`;
+  }
+};
+
+// 取得海外場次的對應門票費用
+function getOverseasTicketPrice(eventItem) {
+  if (eventItem.tour_id) {
+    const teList = D.te.filter(e => e.pid === eventItem.tour_id && e.item.includes('門票'));
+    if (teList.length > 0) {
+      if (eventItem.date.includes('07-19') && teList.length > 1) return teList[1].twd;
+      return teList[0].twd;
+    }
+  }
+  const matchTe = D.te.find(e => e.date === eventItem.date && e.item.includes('門票'));
+  if (matchTe) return matchTe.twd;
+  return eventItem.price;
+}
+
+// 點擊排行榜藝人，顯示依日期由最新排到最舊之明細
+function showArtistDetail(name) {
+  const items = [];
+  D.ev.filter(e => normArtist(e.artist, e.name) === name).forEach(e => {
+    const realPrice = getOverseasTicketPrice(e);
+    items.push({ date: e.date, type: '📚 演唱會/活動', title: e.name, info: `${e.venue}・${e.seat}`, cost: realPrice, raw: e, k: 'ev', isEvent: true });
+  });
+
+  items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const totalCost = items.reduce((s, x) => s + (x.cost || 0), 0);
+
+  $('#mbox').innerHTML = `
+    <h2>🎀 ${name}・參戰場次排行明細</h2>
+    <div style="font-size:14px;color:var(--soft);margin-bottom:8px">共 ${items.length} 場演唱會・累計票價支出 <b>${fmt(totalCost)}</b>（由最新排到最舊）</div>
+    <div style="max-height:60vh;overflow-y:auto;padding-right:4px">
+      ${items.map(it => `
+        <div class="row" onclick="closeM();openM('${it.k}','${it.raw.id}')">
+          <div class="grow">
+            <span class="badge" style="font-size:11px">${it.type}</span> <b>${it.title}</b>
+            <div style="font-size:13px;color:var(--soft)">${it.date}・${it.info}</div>
+          </div>
+          <div style="font-weight:700">${fmt(it.cost)}</div>
+        </div>
+      `).join('') || '<div style="color:var(--soft)">尚無演唱會紀錄</div>'}
+    </div>
+    <div class="acts" style="margin-top:14px">
+      <button class="btn g" onclick="closeM()">關閉</button>
+    </div>
+  `;
+  $('#modal').style.display = 'flex';
+}
+
+function showArtistAssetDetail(name) {
+  const evItems = [];
+  D.ev.filter(e => normArtist(e.artist, e.name) === name).forEach(e => {
+    const realPrice = getOverseasTicketPrice(e);
+    evItems.push({ date: e.date, title: e.name, info: `${e.venue}・${e.seat}`, cost: realPrice, raw: e, k: 'ev' });
+  });
+  D.tp.filter(t => normArtist(t.artist, t.title) === name).forEach(t => {
+    evItems.push({ date: t.start, title: t.title, info: `${t.dest} (${t.start}～${t.end})`, cost: tourSum(t), raw: t, k: 'tp' });
+  });
+  evItems.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const evTotal = evItems.reduce((s, x) => s + (x.cost || 0), 0);
+
+  const merchItems = [];
+  D.pr.filter(p => normArtist(p.artist, p.name) === name).forEach(p => {
+    merchItems.push({ date: p.date, title: p.name, info: `${p.cat}・${p.src}・${p.deliv}`, cost: tot(p), raw: p, k: 'pr' });
+  });
+  D.ov.filter(o => normArtist(o.artist, o.name) === name).forEach(o => {
+    merchItems.push({ date: o.date, title: o.name, info: `${o.cat}・${o.deliv}`, cost: o.amount, raw: o, k: 'ov' });
+  });
+  merchItems.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const merchTotal = merchItems.reduce((s, x) => s + (x.cost || 0), 0);
+  const grandTotal = evTotal + merchTotal;
+
+  $('#mbox').innerHTML = `
+    <h2>💰 ${name}・累積資助金額明細</h2>
+    <div style="font-size:14px;color:var(--soft);margin-bottom:8px">累計總資助支出：<b>${fmt(grandTotal)}</b></div>
+    
+    <div class="sub-stat-grid">
+      <div class="sub-stat-box">
+        <div style="font-size:12px;color:var(--soft)">🎫 演唱會支出小計</div>
+        <div style="font-size:18px;font-weight:700;color:#2b6c96">${fmt(evTotal)}</div>
+      </div>
+      <div class="sub-stat-box pink">
+        <div style="font-size:12px;color:var(--accent-pink-text)">🧸 周邊支出小計</div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent-pink-text)">${fmt(merchTotal)}</div>
+      </div>
+    </div>
+
+    <div style="max-height:50vh;overflow-y:auto;padding-right:4px">
+      <div class="sec-head">🎫 演唱會／活動明細 (${evItems.length} 筆)</div>
+      ${evItems.map(it => `
+        <div class="row" onclick="closeM();openM('${it.k}','${it.raw.id}')">
+          <div class="grow">
+            <b>${it.title}</b>
+            <div style="font-size:13px;color:var(--soft)">${it.date}・${it.info}</div>
+          </div>
+          <div style="font-weight:700">${fmt(it.cost)}</div>
+        </div>
+      `).join('') || '<div style="color:var(--soft);padding:6px">無演唱會紀錄</div>'}
+
+      <div class="sec-head pink" style="margin-top:16px">🧸 周邊／代購明細 (${merchItems.length} 筆)</div>
+      ${merchItems.map(it => `
+        <div class="row" onclick="closeM();openM('${it.k}','${it.raw.id}')">
+          <div class="grow">
+            <b>${it.title}</b>
+            <div style="font-size:13px;color:var(--soft)">${it.date}・${it.info}</div>
+          </div>
+          <div style="font-weight:700">${fmt(it.cost)}</div>
+        </div>
+      `).join('') || '<div style="color:var(--soft);padding:6px">無周邊紀錄</div>'}
+    </div>
+
+    <div class="acts" style="margin-top:14px">
+      <button class="btn g" onclick="closeM()">關閉</button>
+    </div>
+  `;
+  $('#modal').style.display = 'flex';
+}
+
+function exportExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('正在載入 Excel 匯出模組，請稍候重試！');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+
+  const evData = D.ev.map(e => ({
+    '活動名稱': e.name, '藝人': e.artist, '種類': e.type, '日期': e.date,
+    '地點': e.venue, '座位': e.seat, '票價': e.price, '心得備註': e.notes
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(evData), '成果發表會');
+
+  const prData = D.pr.map(p => ({
+    '商品名稱': p.name, '類別': p.cat, '來源': p.src, '到貨情形': p.deliv,
+    '付款方式': p.pay, '購買日期': p.date, '先付金額': p.init, '二補金額': p.supp,
+    '總金額': tot(p), '備註': p.notes, '代購連結': p.link
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prData), '資助小門紀錄');
+
+  const ovData = D.ov.map(o => ({
+    '日期': o.date, '藝人': o.artist, '項目': o.name, '類別': o.cat,
+    '金額': o.amount, '到貨狀態': o.deliv, '代購連結': o.link
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ovData), '愛心氾濫紀錄');
+
+  const teData = D.te.map(e => {
+    const p = D.tp.find(x => x.id === e.pid) || {};
+    return {
+      '所屬專案': p.title || '', '藝人': p.artist || '', '消費日期': e.date,
+      '支出項目': e.item, '屬性': e.cat, '支付方式': e.pay, '幣別': e.cur,
+      '外幣金額': e.orig, '實扣台幣': e.twd, '備註': e.notes
+    };
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(teData), '海外遠征專案明細');
+
+  const fsData = D.fs.map(f => ({
+    '發生日期': f.date, '所屬團體': f.group, '成員': f.member, '互動經過與心得': f.notes
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(fsData), '飯撒紀錄');
+
+  XLSX.writeFile(wb, `追星小屋_全量帳本_${TODAY}.xlsx`);
+}
+
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(D, null, 2));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", "追星小屋_完整備份_" + TODAY + ".json");
+  dlAnchorElem.click();
+}
+
+function openM(k, i, def) {
+  const cur = i ? D[k].find(x => x.id === i) : { ...(k === 'ev' ? { seat: '尚未開賣' } : {}), ...def };
+  const S = F[k];
+  const inp = f => {
+    const v = cur[f[0]] ?? '', t = f[2];
+    if (t === 'tour_select') {
+      const opts = [['', '（無關聯專案）'], ...D.tp.map(p => [p.id, `${p.title} (${p.artist}・${p.dest})`])];
+      return `<label>${f[1]}</label><select id="f_${f[0]}">${opts.map(o => `<option value="${o[0]}" ${o[0]===v?'selected':''}>${o[1]}</option>`).join('')}</select>`;
+    }
+    if (t === 'event_select') {
+      const opts = [['', '（無關聯活動）'], ...D.ev.map(e => [e.id, `${e.date} ${e.artist} - ${e.name}`])];
+      return `<label>${f[1]}</label><select id="f_${f[0]}">${opts.map(o => `<option value="${o[0]}" ${o[0]===v?'selected':''}>${o[1]}</option>`).join('')}</select>`;
+    }
+    if (f[0] === 'ticket' || f[0] === 'photo' || f[0] === 'recap') {
+      return `
+        <label>${f[1]}</label>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+          <input id="f_${f[0]}" type="text" value="${String(v).replace(/"/g,'&quot;')}" placeholder="貼上雲端分享連結 或 點右側按鈕上傳">
+          <input type="file" id="file_up_${f[0]}" accept="image/*" style="display:none" onchange="uploadImageToDrive(this, '${f[0]}')">
+          <button type="button" class="btn" style="padding:6px 12px;font-size:13px;flex:none" onclick="$('#file_up_${f[0]}').click()">📁 圖庫上傳</button>
+        </div>
+        <div id="upload_status_${f[0]}" style="font-size:12px;color:var(--soft)"></div>
+      `;
+    }
+    if (f[0] === 'link') {
+      return `
+        <label>${f[1]}</label>
+        <input id="f_${f[0]}" type="text" value="${String(v).replace(/"/g,'&quot;')}" placeholder="請輸入網址或下方快速選取">
+        <label style="font-size:12px;color:var(--soft);margin-top:4px">✨ 常用代購對帳單快速帶入：</label>
+        <select onchange="if(this.value)${`$('#f_${f[0]}').value = this.value`}" style="font-size:13px;padding:4px 8px">
+          <option value="">-- 請選擇常用對帳單網址 --</option>
+          ${PRESET_LINKS.map(pl => `<option value="${pl.url}" ${pl.url===v?'selected':''}>${pl.name}</option>`).join('')}
+        </select>
+      `;
+    }
+    return `<label>${f[1]}</label>` + (
+      t === 's' ? `<select id="f_${f[0]}">${f[3].map(o => `<option ${o==v?'selected':''}>${o}</option>`).join('')}</select>` :
+      t === 'a' ? `<textarea id="f_${f[0]}" rows="3">${v}</textarea>` :
+      `<input id="f_${f[0]}" type="${t==='n'?'number':t==='date'?'date':'text'}" value="${String(v).replace(/"/g,'&quot;')}">`
+    );
+  };
+  
+  const photoVal = cur.ticket || cur.photo || '';
+  const imgUrl = resolveDriveImg(photoVal);
+  const imgPreviewHtml = imgUrl ? `
+    <div class="img-preview-container" style="margin-top:10px">
+      <div style="font-size:13px;color:var(--soft)">雲端照片預覽：</div>
+      <img src="${imgUrl}" class="img-preview" alt="預覽照片" onerror="this.style.display='none'">
+    </div>
+  ` : '';
+
+  $('#mbox').innerHTML = `
+    <h2>${i?'📄 編輯':'✏️ 新增'}・${S.t}</h2>
+    ${imgPreviewHtml}
+    ${S.f.map(inp).join('')}
+    <div class="acts">
+      <button class="btn" onclick="saveM('${k}','${i||''}','${cur.pid||''}')">儲存</button>
+      <button class="btn g" onclick="closeM()">取消</button>
+      ${i ? `<button class="btn d" id="del" onclick="delM('${k}','${i}')">刪除</button>` : ''}
+    </div>`;
+  $('#modal').style.display = 'flex';
+}
+
+function uploadImageToDrive(fileInput, fieldName) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  const statusEl = $('#' + 'upload_status_' + fieldName);
+  statusEl.textContent = '⏳ 正在上傳至雲端硬碟，請稍候...';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64Data = e.target.result.split(',')[1];
+    const payload = {
+      action: 'uploadImage',
+      filename: file.name,
+      mimetype: file.type,
+      filedata: base64Data
+    };
+
+    if (!GAS_API_URL) {
+      const localUrl = URL.createObjectURL(file);
+      $('#f_' + fieldName).value = localUrl;
+      statusEl.textContent = '✓ 已從圖庫選擇（提示：尚未設定 GAS_API_URL，目前為暫時預覽，建議部署 GAS 以自動存入雲端硬碟）';
+      openM_refreshPreview(fieldName, localUrl);
+      return;
+    }
+
+    fetch(GAS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.url) {
+        $('#f_' + fieldName).value = data.url;
+        statusEl.textContent = '✓ 成功上傳至雲端硬碟並取得連結！';
+        openM_refreshPreview(fieldName, data.url);
+      } else {
+        statusEl.textContent = '✗ 上傳失敗：' + (data.error || '未知錯誤');
+      }
+    })
+    .catch(err => {
+      statusEl.textContent = '✗ 上傳發生網路錯誤，請確認 GAS 端點是否正確部署。';
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function openM_refreshPreview(fieldName, url) {
+  const resolved = resolveDriveImg(url);
+  let prevContainer = $('#mbox').querySelector('.img-preview-container');
+  if (!prevContainer) {
+    prevContainer = document.createElement('div');
+    prevContainer.className = 'img-preview-container';
+    prevContainer.style.marginTop = '10px';
+    const h2 = $('#mbox').querySelector('h2');
+    h2.after(prevContainer);
+  }
+  prevContainer.innerHTML = `
+    <div style="font-size:13px;color:var(--soft)">預覽照片：</div>
+    <img src="${resolved}" class="img-preview" alt="預覽照片">
+  `;
+}
+
+function closeM() { $('#modal').style.display = 'none'; }
+
+function saveM(k, i, pid) {
+  const o = i ? D[k].find(x => x.id === i) : { id: id() };
+  F[k].f.forEach(f => {
+    const el = $('#f_' + f[0]);
+    if (el) {
+      const v = el.value;
+      o[f[0]] = f[2] === 'n' ? (+v || 0) : v;
+    }
+  });
+  if (pid) o.pid = pid;
+  if (!i) D[k].push(o);
+  save();
+  closeM();
+  go(room);
+}
+
+function delM(k, i) {
+  const b = $('#del');
+  if (b.dataset.s !== '1') {
+    b.dataset.s = '1';
+    b.textContent = '確認刪除';
+    return;
+  }
+  D[k] = D[k].filter(x => x.id !== i);
+  if (k === 'tp') D.te = D.te.filter(e => e.pid !== i);
+  save();
+  closeM();
+  go(room);
+}
+
+function go(r) {
+  room = r;
+  if (r !== 'tour') tp = null;
+  $('#nav').className = min ? 'min' : '';
+  $('#nav').innerHTML = `
+    <h1><span class="lb">追星小屋🏠</span><button id="tg" onclick="min=!min;go(room)" title="收合/展開">${min?'»':'«'}</button></h1>` +
+    rooms.map(x => `<button class="${x[0]===r?'on':''}" onclick="go('${x[0]}')" title="${x[2]}"><span>${x[1]}</span><span class="lb">${x[2]}</span></button>`).join('');
+  $('#main').innerHTML = V[r]();
+}
+
+go('home');
+</script>
+</body>
+</html>
