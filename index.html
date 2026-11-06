@@ -905,16 +905,6 @@ const V = {
     const hasNextYr = D.yearly && D.yearly[nextYr];
 
     return `
-      <!-- 跨年測試與日期模擬小列 -->
-      <div class="sim-bar">
-        <span>📅 目前系統日期：<b>${dt}</b></span>
-        <div style="display:flex;gap:4px">
-          <button class="${simDateOverride===''?'on':''}" onclick="simDateOverride='';go('home')">真實今天</button>
-          <button class="${simDateOverride==='2026-11-06'?'on':''}" onclick="simDateOverride='2026-11-06';go('home')">2026/11/06</button>
-          <button class="${simDateOverride==='2026-12-15'?'on':''}" onclick="simDateOverride='2026-12-15';go('home')">2026/12/15 (預填)</button>
-          <button class="${simDateOverride==='2027-01-01'?'on':''}" onclick="simDateOverride='2027-01-01';go('home')">2027/01/01 (跨年)</button>
-        </div>
-      </div>
 
       <!-- 月老籤詩獨立區塊 -->
       <div class="card" style="background:var(--accent-pink)">
