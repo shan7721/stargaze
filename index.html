@@ -373,39 +373,60 @@ label { display: block; font-size: 14px; color: var(--soft); margin-top: 9px; }
   border: 1.5px dashed #e5a9bc;
   border-radius: 16px;
 }
-.sim-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 14px;
-  margin-bottom: 14px;
-  background: var(--blue-milk);
-  border: 1px dashed var(--line);
-  border-radius: 14px;
-  font-size: 13px;
-  color: var(--soft);
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+.row { flex-wrap: nowrap; }
+.row > div:last-child:not(.grow) { flex: none; text-align: right; }
+.card h2 { flex-wrap: wrap; }
+.card, .row b, .kv span { overflow-wrap: anywhere; }
+.cover { cursor: zoom-in; position: relative; }
+.cover.noimg { cursor: inherit; }
+.cover .multi {
+  position: absolute; right: 2px; bottom: 2px; font-size: 10px; line-height: 1;
+  background: rgba(0,0,0,.55); color: #fff; padding: 2px 4px; border-radius: 6px;
 }
-.sim-bar button {
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 99px;
-  cursor: pointer;
+.img-preview { cursor: zoom-in; }
+.prev-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+.prev-wrap figure { margin: 0; }
+.prev-wrap figcaption { font-size: 12px; color: var(--soft); margin-bottom: 2px; }
+.prev-wrap .img-preview { margin: 0; max-height: 200px; }
+
+/* 圖片燈箱（放大看圖） */
+#lightbox {
+  position: fixed; inset: 0; z-index: 50; display: none;
+  background: rgba(15, 25, 35, .92);
+  align-items: center; justify-content: center;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  touch-action: pinch-zoom;
 }
-.sim-bar button.on {
-  background: var(--blue-main);
-  border-color: var(--blue-main);
-  color: #173b52;
-  font-weight: 700;
+#lightbox.on { display: flex; }
+#lightbox .lb-img {
+  max-width: 96vw; max-height: 88vh; object-fit: contain;
+  border-radius: 8px; background: #fff1;
+}
+#lightbox .lb-btn {
+  position: absolute; border: 0; cursor: pointer; font: inherit;
+  background: rgba(255,255,255,.18); color: #fff; border-radius: 99px;
+  width: 44px; height: 44px; font-size: 22px; line-height: 44px; text-align: center;
+}
+#lightbox .lb-close { top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; }
+#lightbox .lb-prev { left: 10px; top: 50%; transform: translateY(-50%); }
+#lightbox .lb-next { right: 10px; top: 50%; transform: translateY(-50%); }
+#lightbox .lb-cap {
+  position: absolute; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0;
+  text-align: center; color: #fff; font-size: 14px; padding: 0 60px;
 }
 
+/* 平板：側邊欄縮窄 */
+@media(max-width: 900px) and (min-width: 701px) {
+  nav { width: 150px; }
+  main { padding: 16px 12px; }
+}
+
+/* 手機 */
 @media(max-width: 700px) {
-  .app { display: block; padding-bottom: 78px; }
+  .app { display: block; padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+  main { padding: 14px 12px; }
   nav, nav.min {
     position: fixed;
     bottom: 0;
@@ -418,12 +439,26 @@ label { display: block; font-size: 14px; color: var(--soft); margin-top: 9px; }
     padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
     z-index: 5;
     justify-content: space-around;
+    gap: 2px;
   }
   nav h1 { display: none; }
-  nav button, nav.min button { text-align: center; padding: 4px 6px; font-size: 12px; }
+  nav button, nav.min button { text-align: center; padding: 4px 2px; font-size: 12px; flex: 1; min-width: 0; }
   nav .lb, nav.min .lb { display: inline !important; }
   nav button span { display: block; margin: 0; font-size: 20px; }
-  .budget-strip { justify-content: space-around; }
+  .budget-strip { justify-content: space-around; font-size: 13px; }
+  .card { padding: 16px 14px; border-radius: 18px; }
+  .card h2 { font-size: 18px; }
+  .big { font-size: 30px; }
+  .cover { width: 48px; height: 48px; }
+  .row { gap: 10px; padding: 10px 4px; }
+  input, textarea, select { font-size: 16px; } /* 避免 iOS 聚焦時自動放大 */
+  #modal { padding: 10px 8px; }
+  #modal .card { max-width: 100%; }
+  .acts .btn { flex: 1; }
+  .sub-stat-grid { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr; }
+  #lightbox .lb-prev { left: 4px; }
+  #lightbox .lb-next { right: 4px; }
 }
 </style>
 </head>
@@ -432,18 +467,19 @@ label { display: block; font-size: 14px; color: var(--soft); margin-top: 9px; }
   <nav id="nav"></nav>
   <main id="main"></main>
 </div>
+<div id="lightbox" onclick="if(event.target.id==='lightbox')closeLB()"></div>
 <div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="card" id="mbox"></div></div>
 
 <script>
 // Google Apps Script (GAS) Web App 雲端回寫端點與雲端硬碟圖片上傳端點 (部署GAS後貼於此處即可全自動同步與上傳圖片)
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwj338N4poUM1W8aeUzEzvv-3TF9W_E3ZJVgHfZjf8yY9yFGlQcqugt9W6nq4X4N3D5/exec';
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby0FvTYny-xWjFVoVmuzE18tOA9yui-DWpUnR77CKrWFg99yyRGhpe0oF9YqI-6FIvZ/exec';
 
-function resolveDriveImg(pathOrUrl) {
+function resolveDriveImg(pathOrUrl, sz = 800) {
   if (!pathOrUrl) return '';
   const s = String(pathOrUrl).trim();
   const m = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || s.match(/id=([a-zA-Z0-9_-]+)/) || s.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800`;
-  if (/^https?:/.test(s)) return s;
+  if (m && m[1]) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w${sz}`;
+  if (/^(https?:|blob:|data:)/.test(s)) return s;
   return '';
 }
 
@@ -470,7 +506,9 @@ function onPoemSelect(no) {
 }
 
 const fmt = n => '$' + Math.round(n || 0).toLocaleString();
-const TODAY = '2026-11-06', YR = '2026';
+const _now = new Date();
+const TODAY = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+const YR = TODAY.slice(0, 4);
 const rooms = [
   ['home', '🛋️', '客廳'],
   ['events', '📚', '書房'],
@@ -508,7 +546,7 @@ const F = {
     ['est', '預估預留金額 TWD', 'n'],
     ['tour_id', '關聯海外遠征專案', 'tour_select'],
     ['ticket', '票根/照片（Google Drive 連結 或 點右側圖庫上傳）'],
-    ['recap', '返圖資料夾（Google Drive 連結）'],
+    ['recap', '返圖（Google Drive 圖片連結 或 點右側圖庫上傳；列表會優先顯示返圖）'],
     ['notes', '心得／備註', 'a']
   ]},
   pr: { t: '資助小門紀錄', f: [
@@ -872,13 +910,88 @@ function bcard(t, rem, tot) {
     </div>`;
 }
 
-function getCoverEl(e, ic) {
-  const imgUrl = resolveDriveImg(e.ticket || e.photo);
-  if (imgUrl) {
-    return `<div class="cover"><img src="${imgUrl}" onerror="this.onerror=null;this.parentNode.innerHTML='${ic}';"></div>`;
-  }
-  return `<div class="cover">${ic}</div>`;
+// 取得項目的圖片清單，順序：1.返圖 2.票根 3.（飯撒等）照片；皆沒有則用 Emoji
+const IMG_FIELDS = [['recap', '返圖'], ['ticket', '票根／照片'], ['photo', '照片']];
+function getItemImages(e, sz = 800) {
+  const out = [];
+  IMG_FIELDS.forEach(([f, label]) => {
+    const u = resolveDriveImg(e[f], sz);
+    if (u) out.push({ url: u, full: resolveDriveImg(e[f], 2000), label });
+  });
+  return out;
 }
+
+function getCoverEl(e, ic) {
+  const imgs = getItemImages(e);
+  if (!imgs.length) return `<div class="cover noimg">${ic}</div>`;
+  const key = 'c' + (++coverSeq);
+  coverReg[key] = { e, ic };
+  // 依序嘗試：返圖 → 票根 → Emoji（圖片載入失敗時自動換下一個）
+  return `<div class="cover" id="${key}" onclick="event.stopPropagation();openLB('${key}')" title="點擊放大">
+    <img src="${imgs[0].url}" data-i="0" loading="lazy" onerror="coverFail('${key}')" alt="">
+    ${imgs.length > 1 ? `<span class="multi">${imgs.length}</span>` : ''}
+  </div>`;
+}
+let coverSeq = 0;
+const coverReg = {};
+function coverFail(key) {
+  const el = document.getElementById(key);
+  const r = coverReg[key];
+  if (!el || !r) return;
+  const img = el.querySelector('img');
+  const imgs = getItemImages(r.e);
+  const next = (+img.dataset.i || 0) + 1;
+  if (next < imgs.length) {
+    img.dataset.i = next;
+    img.src = imgs[next].url;
+  } else {
+    el.className = 'cover noimg';
+    el.removeAttribute('onclick');
+    el.innerHTML = r.ic;
+  }
+}
+
+// 燈箱：點圖放大，多張可左右切換
+let lbList = [], lbIdx = 0;
+function openLB(key, startIdx) {
+  const r = coverReg[key];
+  if (!r) return;
+  lbList = getItemImages(r.e).map(x => ({ url: x.full, thumb: x.url, label: x.label }));
+  if (!lbList.length) return;
+  const img = document.querySelector('#' + key + ' img');
+  lbIdx = startIdx != null ? startIdx : (img ? Math.min(+img.dataset.i || 0, lbList.length - 1) : 0);
+  showLB();
+}
+function openLBUrls(urls, idx) {
+  lbList = urls;
+  lbIdx = idx || 0;
+  showLB();
+}
+function showLB() {
+  const it = lbList[lbIdx];
+  const many = lbList.length > 1;
+  $('#lightbox').innerHTML = `
+    <img class="lb-img" src="${it.url}" alt="" onerror="if(!this.dataset.f&&'${it.thumb || ''}'){this.dataset.f=1;this.src='${it.thumb || ''}';}">
+    <button class="lb-btn lb-close" onclick="closeLB()" aria-label="關閉">✕</button>
+    ${many ? `<button class="lb-btn lb-prev" onclick="event.stopPropagation();stepLB(-1)" aria-label="上一張">‹</button>
+    <button class="lb-btn lb-next" onclick="event.stopPropagation();stepLB(1)" aria-label="下一張">›</button>` : ''}
+    <div class="lb-cap">${it.label || ''}${many ? `（${lbIdx + 1} / ${lbList.length}）` : ''}</div>`;
+  $('#lightbox').classList.add('on');
+}
+function stepLB(d) {
+  lbIdx = (lbIdx + d + lbList.length) % lbList.length;
+  showLB();
+}
+function closeLB() {
+  $('#lightbox').classList.remove('on');
+  $('#lightbox').innerHTML = '';
+}
+document.addEventListener('keydown', ev => {
+  if (!$('#lightbox').classList.contains('on')) return;
+  if (ev.key === 'Escape') closeLB();
+  else if (ev.key === 'ArrowLeft' && lbList.length > 1) stepLB(-1);
+  else if (ev.key === 'ArrowRight' && lbList.length > 1) stepLB(1);
+});
 
 const rowH = (k, x, ic, t, s, r, extraHtml='') => `
   <div class="row" onclick="openM('${k}','${x.id}')">
@@ -905,7 +1018,7 @@ const V = {
     const hasNextYr = D.yearly && D.yearly[nextYr];
 
     return `
-
+      ${simDateOverride ? `<div style="margin-bottom:12px"><button class="pill" onclick="simDateOverride='';go('home')">← 回到 ${TODAY.slice(0,4)} 年度</button></div>` : ''}
       <!-- 月老籤詩獨立區塊 -->
       <div class="card" style="background:var(--accent-pink)">
         <span class="tape" style="background:var(--tape-color-alt)"></span>
@@ -1061,7 +1174,7 @@ const V = {
     const yr = dt.slice(0, 4);
     const cf = getActiveConfig();
     const c = calc();
-    const curMonth = 11;
+    const curMonth = Math.max(1, +dt.slice(5, 7));
     const monthAvg = c.evT / curMonth;
     const isOver = monthAvg > 4000;
     const good = !isOver;
@@ -1383,18 +1496,9 @@ function openM(k, i, def) {
     );
   };
   
-  const photoVal = cur.ticket || cur.photo || '';
-  const imgUrl = resolveDriveImg(photoVal);
-  const imgPreviewHtml = imgUrl ? `
-    <div class="img-preview-container" style="margin-top:10px">
-      <div style="font-size:13px;color:var(--soft)">雲端照片預覽：</div>
-      <img src="${imgUrl}" class="img-preview" alt="預覽照片" onerror="this.style.display='none'">
-    </div>
-  ` : '';
-
   $('#mbox').innerHTML = `
     <h2>${i?'📄 編輯':'✏️ 新增'}・${S.t}</h2>
-    ${imgPreviewHtml}
+    <div id="prev_box"></div>
     ${S.f.map(inp).join('')}
     <div class="acts">
       <button class="btn" onclick="saveM('${k}','${i||''}','${cur.pid||''}')">儲存</button>
@@ -1402,68 +1506,81 @@ function openM(k, i, def) {
       ${i ? `<button class="btn d" id="del" onclick="delM('${k}','${i}')">刪除</button>` : ''}
     </div>`;
   $('#modal').style.display = 'flex';
+  S.f.forEach(f => { const el = $('#f_' + f[0]); if (el && IMG_FIELDS.some(x => x[0] === f[0])) el.addEventListener('input', renderPreviews); });
+  renderPreviews();
+}
+
+// 依目前欄位內容顯示圖片預覽（返圖 → 票根 → 照片），點圖可放大
+function renderPreviews() {
+  const box = $('#prev_box');
+  if (!box) return;
+  const items = [];
+  IMG_FIELDS.forEach(([f, label]) => {
+    const el = $('#f_' + f);
+    if (!el) return;
+    const u = resolveDriveImg(el.value, 800);
+    if (u) items.push({ url: u, full: resolveDriveImg(el.value, 2000), label });
+  });
+  if (!items.length) { box.innerHTML = ''; return; }
+  window._prevItems = items.map(x => ({ url: x.full, thumb: x.url, label: x.label }));
+  box.innerHTML = `<div class="prev-wrap">${items.map((x, n) => `
+    <figure>
+      <figcaption>${x.label}（點擊放大）</figcaption>
+      <img src="${x.url}" class="img-preview" alt="${x.label}" onclick="openLBUrls(window._prevItems, ${n})" onerror="this.style.display='none'">
+    </figure>`).join('')}</div>`;
+}
+
+// 上傳前先壓縮（長邊 1600px、JPEG），避免手機大圖超過 GAS 傳輸限制
+function compressImage(file, maxSide = 1600, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      const r = Math.min(1, maxSide / Math.max(im.width, im.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(im.width * r);
+      c.height = Math.round(im.height * r);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve({ dataUrl: c.toDataURL('image/jpeg', quality), name: file.name.replace(/\.[^.]+$/, '') + '.jpg' });
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); reject(new Error('無法讀取圖片')); };
+    im.src = url;
+  });
 }
 
 function uploadImageToDrive(fileInput, fieldName) {
   const file = fileInput.files[0];
   if (!file) return;
-  const statusEl = $('#' + 'upload_status_' + fieldName);
-  statusEl.textContent = '⏳ 正在上傳至雲端硬碟，請稍候...';
+  const statusEl = $('#upload_status_' + fieldName);
+  statusEl.textContent = '⏳ 正在壓縮並上傳至雲端硬碟，請稍候...';
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64Data = e.target.result.split(',')[1];
+  compressImage(file).then(({ dataUrl, name }) => {
     const payload = {
       action: 'uploadImage',
-      filename: file.name,
-      mimetype: file.type,
-      filedata: base64Data
+      filename: name,
+      mimetype: 'image/jpeg',
+      filedata: dataUrl.split(',')[1]
     };
-
-    if (!GAS_API_URL) {
-      const localUrl = URL.createObjectURL(file);
-      $('#f_' + fieldName).value = localUrl;
-      statusEl.textContent = '✓ 已從圖庫選擇（提示：尚未設定 GAS_API_URL，目前為暫時預覽，建議部署 GAS 以自動存入雲端硬碟）';
-      openM_refreshPreview(fieldName, localUrl);
-      return;
-    }
-
-    fetch(GAS_API_URL, {
+    return fetch(GAS_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.url) {
-        $('#f_' + fieldName).value = data.url;
-        statusEl.textContent = '✓ 成功上傳至雲端硬碟並取得連結！';
-        openM_refreshPreview(fieldName, data.url);
-      } else {
-        statusEl.textContent = '✗ 上傳失敗：' + (data.error || '未知錯誤');
-      }
-    })
-    .catch(err => {
-      statusEl.textContent = '✗ 上傳發生網路錯誤，請確認 GAS 端點是否正確部署。';
-    });
-  };
-  reader.readAsDataURL(file);
-}
-
-function openM_refreshPreview(fieldName, url) {
-  const resolved = resolveDriveImg(url);
-  let prevContainer = $('#mbox').querySelector('.img-preview-container');
-  if (!prevContainer) {
-    prevContainer = document.createElement('div');
-    prevContainer.className = 'img-preview-container';
-    prevContainer.style.marginTop = '10px';
-    const h2 = $('#mbox').querySelector('h2');
-    h2.after(prevContainer);
-  }
-  prevContainer.innerHTML = `
-    <div style="font-size:13px;color:var(--soft)">預覽照片：</div>
-    <img src="${resolved}" class="img-preview" alt="預覽照片">
-  `;
+    }).then(res => res.json());
+  })
+  .then(data => {
+    if (data && data.url) {
+      $('#f_' + fieldName).value = data.url;
+      statusEl.textContent = '✓ 成功上傳至雲端硬碟！記得按「儲存」。';
+      renderPreviews();
+    } else {
+      statusEl.textContent = '✗ 上傳失敗：' + ((data && data.error) || '未知錯誤');
+    }
+  })
+  .catch(err => {
+    statusEl.textContent = '✗ 上傳失敗（' + (err.message || '網路錯誤') + '），請確認 GAS 已部署為「任何人可存取」的網頁應用程式。';
+  });
+  fileInput.value = '';
 }
 
 function closeM() { $('#modal').style.display = 'none'; }
