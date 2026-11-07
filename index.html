@@ -417,6 +417,26 @@ img { max-width: 100%; }
   text-align: center; color: #fff; font-size: 14px; padding: 0 60px;
 }
 
+/* 待辦／未完成 特別標示 */
+.row.alert { background: var(--accent-pink); border-left: 5px solid var(--danger); padding-left: 10px; }
+.row.alert:hover { background: #fbd5de; }
+.row.alert b { color: var(--danger); font-weight: 900; }
+.flag {
+  display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 99px;
+  background: var(--danger); color: #fff; margin-left: 6px; vertical-align: middle; white-space: nowrap;
+}
+.flag.soft { background: #ffd9e4; color: #7a374c; }
+.sec-title { font-weight: 700; color: var(--danger); margin: 4px 0 2px; font-size: 14px; }
+.sec-title.calm { color: var(--soft); margin-top: 14px; }
+.tabs button .cnt {
+  display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 99px;
+  background: var(--danger); color: #fff; font-size: 12px; line-height: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .row.alert { background: #442a34; }
+  :root:not([data-theme="light"]) .row.alert:hover { background: #55313f; }
+}
+
 /* 平板：側邊欄縮窄 */
 @media(max-width: 900px) and (min-width: 701px) {
   nav { width: 150px; }
@@ -425,14 +445,17 @@ img { max-width: 100%; }
 
 /* 手機 */
 @media(max-width: 700px) {
-  .app { display: block; padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+  .app { display: block; min-height: 0; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
   main { padding: 14px 12px; }
   nav, nav.min {
     position: fixed;
+    top: auto;
     bottom: 0;
     left: 0;
     right: 0;
     width: auto;
+    align-self: auto;
+    padding-top: 6px;
     flex-direction: row;
     background: var(--paper);
     border-top: 2px dashed var(--line);
@@ -442,7 +465,7 @@ img { max-width: 100%; }
     gap: 2px;
   }
   nav h1 { display: none; }
-  nav button, nav.min button { text-align: center; padding: 4px 2px; font-size: 12px; flex: 1; min-width: 0; }
+  nav button, nav.min button { text-align: center; padding: 4px 2px; font-size: 11px; flex: 1; min-width: 0; }
   nav .lb, nav.min .lb { display: inline !important; }
   nav button span { display: block; margin: 0; font-size: 20px; }
   .budget-strip { justify-content: space-around; font-size: 13px; }
@@ -993,8 +1016,8 @@ document.addEventListener('keydown', ev => {
   else if (ev.key === 'ArrowRight' && lbList.length > 1) stepLB(1);
 });
 
-const rowH = (k, x, ic, t, s, r, extraHtml='') => `
-  <div class="row" onclick="openM('${k}','${x.id}')">
+const rowH = (k, x, ic, t, s, r, extraHtml='', alert=false) => `
+  <div class="row${alert ? ' alert' : ''}" onclick="openM('${k}','${x.id}')">
     ${getCoverEl(x, ic)}
     <div class="grow">
       <b>${t}</b>
@@ -1075,42 +1098,75 @@ const V = {
   },
 
   events() {
+    const today = getActiveDate();
+    const isUp = e => (e.date || '') >= today;           // 尚未發生（含今天）
+    const upcoming = D.ev.filter(isUp).sort((a, b) => (a.date || '').localeCompare(b.date || '')); // 最近的在最上面
+    const past = D.ev.filter(e => !isUp(e)).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const daysTo = d => Math.round((new Date(d + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
+    const one = e => {
+      const up = isUp(e);
+      const matchedFs = D.fs.find(f => f.event_id === e.id || f.date === e.date);
+      const matchedTour = D.tp.find(t => t.id === e.tour_id || (e.notes || '').includes('外站'));
+      let extra = '';
+      if (matchedFs) {
+        extra += `<span class="cross-link" onclick="event.stopPropagation();go('wall');">💌 飯撒回憶：${matchedFs.member} (${(matchedFs.notes || '').slice(0, 10)}...)</span>`;
+      }
+      if (matchedTour) {
+        extra += `<span class="cross-link" style="background:#eaf5fc;color:#2c5b96;border-color:#b4d2f7" onclick="event.stopPropagation();tp='${matchedTour.id}';go('tour');">✈️ 外站專案：${matchedTour.title}</span>`;
+      }
+      const n = up ? daysTo(e.date) : 0;
+      const flag = up ? `<span class="flag">${n === 0 ? '今天！' : `倒數 ${n} 天`}</span>` : '';
+      return rowH('ev', e, e.recap ? '📸' : e.ticket ? '🎟️' : e.must === '是' ? '🔖' : '🎀',
+        e.name + flag, `${e.date}・${e.artist}・${e.venue}・${e.seat}`,
+        e.must === '是' && up ? `<span class="badge">預留 ${fmt(e.est)}</span>` : fmt(e.price), extra, up);
+    };
     return `
       <div class="card">
         <span class="tape"></span>
         <h2>📚 成果發表會 (${D.ev.length} 場) ${addB('ev')}</h2>
-        ${[...D.ev].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(e=>{
-          const matchedFs = D.fs.find(f => f.event_id === e.id || f.date === e.date);
-          const matchedTour = D.tp.find(t => t.id === e.tour_id || e.notes.includes('外站'));
-          let extra = '';
-          if (matchedFs) {
-            extra += `<span class="cross-link" onclick="event.stopPropagation();go('wall');">💌 飯撒回憶：${matchedFs.member} (${matchedFs.notes.slice(0, 10)}...)</span>`;
-          }
-          if (matchedTour) {
-            extra += `<span class="cross-link" style="background:#eaf5fc;color:#2c5b96;border-color:#b4d2f7" onclick="event.stopPropagation();tp='${matchedTour.id}';go('tour');">✈️ 外站專案：${matchedTour.title}</span>`;
-          }
-          return rowH('ev', e, e.recap ? '📸' : e.ticket ? '🎟️' : e.must==='is' ? '🔖' : '🎀', e.name, `${e.date}・${e.artist}・${e.venue}・${e.seat}`, e.must==='是'&&e.date>getActiveDate() ? `<span class="badge">預留 ${fmt(e.est)}</span>` : fmt(e.price), extra);
-        }).join('')||'<div style="color:var(--soft)">無紀錄</div>'}
+        ${upcoming.length ? `<div class="sec-title">⏳ 尚未發生（${upcoming.length} 場）</div>${upcoming.map(one).join('')}` : ''}
+        ${past.length ? `<div class="sec-title calm">已結束（${past.length} 場）</div>${past.map(one).join('')}` : ''}
+        ${D.ev.length ? '' : '<div style="color:var(--soft)">無紀錄</div>'}
       </div>`;
   },
 
   merch() {
     const t = tab === 'pr';
+    // 資助小門：非「已到貨／已取貨」→ 待處理（已到貨視同已付清）
+    const prPending = p => !['已到貨', '已取貨'].includes(p.deliv);   // 已到貨 = 已付清，只看到貨狀態
+    // 愛心氾濫：非「已到貨」→ 待處理
+    const ovPending = o => o.deliv !== '已到貨';
+    const byDate = (a, b) => (b.date || '').localeCompare(a.date || '');
+    const prWhy = p => {
+      const w = [];
+      if (['先付待二補', '付訂金'].includes(p.pay)) w.push('待補款');
+      if (!['已到貨', '已取貨'].includes(p.deliv)) w.push(p.deliv || '未到貨');
+      return w;
+    };
+    const prRow = p => {
+      const extra = p.link ? `<a href="${p.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
+      const pend = prPending(p);
+      const flag = pend ? prWhy(p).map(w => `<span class="flag">${w}</span>`).join('') : '';
+      return rowH('pr', p, '🧸', `${p.artist}・${p.name}${flag}`, `${p.src}・${p.pay}・${p.deliv}`, fmt(tot(p)), extra, pend);
+    };
+    const ovRow = o => {
+      const extra = o.link ? `<a href="${o.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
+      const pend = ovPending(o);
+      return rowH('ov', o, '💗', `${o.artist}・${o.name}${pend ? `<span class="flag">${o.deliv || '未到貨'}</span>` : ''}`, `${o.date}・${o.deliv}`, fmt(o.amount), extra, pend);
+    };
+    const list = t ? D.pr : D.ov, isP = t ? prPending : ovPending, rowFn = t ? prRow : ovRow;
+    const pend = list.filter(isP).sort(byDate), done = list.filter(x => !isP(x)).sort(byDate);
+    const pc = D.pr.filter(prPending).length, oc = D.ov.filter(ovPending).length;
     return `
       <div class="tabs">
-        <button class="${t?'on':''}" onclick="tab='pr';go('merch')">資助小門紀錄 🧸</button>
-        <button class="${t?'':'on'}" onclick="tab='ov';go('merch')">愛心氾濫紀錄 💗</button>
+        <button class="${t?'on':''}" onclick="tab='pr';go('merch')">資助小門紀錄 🧸${pc ? `<span class="cnt">${pc}</span>` : ''}</button>
+        <button class="${t?'':'on'}" onclick="tab='ov';go('merch')">愛心氾濫紀錄 💗${oc ? `<span class="cnt">${oc}</span>` : ''}</button>
       </div>
       <div class="card">
         <span class="tape"></span>
         <h2>${t?'資助小門紀錄':'愛心氾濫紀錄'} ${addB(tab)}</h2>
-        ${t ? [...D.pr].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p => {
-          const extra = p.link ? `<a href="${p.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
-          return rowH('pr', p, '🧸', `${p.artist}・${p.name}`, `${p.src}・${p.pay}・${p.deliv}`, fmt(tot(p)), extra);
-        }).join('') : [...D.ov].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(o => {
-          const extra = o.link ? `<a href="${o.link}" target="_blank" class="cross-link" onclick="event.stopPropagation()">🔗 代購對帳表 ➔</a>` : '';
-          return rowH('ov', o, '💗', `${o.artist}・${o.name}`, `${o.date}・${o.deliv}`, fmt(o.amount), extra);
-        }).join('')}
+        ${pend.length ? `<div class="sec-title">📦 未到貨／待處理（${pend.length} 筆）</div>${pend.map(rowFn).join('')}` : ''}
+        ${done.length ? `<div class="sec-title calm">已完成（${done.length} 筆）</div>${done.map(rowFn).join('')}` : ''}
         <div style="margin-top:12px;text-align:right;font-weight:700;color:#2b6c96">合計 ${fmt(t?sum(D.pr,tot):sum(D.ov,o=>o.amount))}</div>
       </div>`;
   },
@@ -1137,16 +1193,27 @@ const V = {
           ${[...es].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(e=>rowH('te',e,'🧾',e.item,`${e.date}・${e.cat}・${e.pay}`,fmt(e.twd)))||'<div style="color:var(--soft)">無花費明細</div>'}
         </div>`;
     }
+    const today = getActiveDate();
+    const ongoing = p => (p.end || p.start || '') >= today;   // 回程日（沒填則出發日）還沒過 = 尚未結束
+    const tRow = p => {
+      const on = ongoing(p);
+      const started = (p.start || '') <= today;
+      const flag = on ? `<span class="flag">${started ? '旅程進行中' : '尚未出發'}</span>` : '';
+      return `
+        <div class="row${on ? ' alert' : ''}" onclick="tp='${p.id}';go('tour')">
+          <div class="cover noimg">${on ? '🛫' : '✈️'}</div>
+          <div class="grow"><b>${p.title}${flag}</b><div style="font-size:13px;color:var(--soft)">${p.artist}・${p.dest}<br>${p.start || ''}～${p.end || ''}</div></div>
+          <div>${fmt(tourSum(p))}</div>
+        </div>`;
+    };
+    const open = D.tp.filter(ongoing).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+    const closed = D.tp.filter(p => !ongoing(p)).sort((a, b) => (b.start || '').localeCompare(a.start || ''));
     return `
       <div class="card">
         <span class="tape"></span>
         <h2>🧳 行李箱・海外遠征 ${addB('tp')}</h2>
-        ${[...D.tp].sort((a, b) => (b.start || '').localeCompare(a.start || '')).map(p=>`
-          <div class="row" onclick="tp='${p.id}';go('tour')">
-            <div class="cover">✈️</div>
-            <div class="grow"><b>${p.title}</b><div style="font-size:13px;color:var(--soft)">${p.artist}・${p.dest}</div></div>
-            <div>${fmt(tourSum(p))}</div>
-          </div>`).join('')}
+        ${open.length ? `<div class="sec-title">🛫 尚未結束的旅程（${open.length}）</div>${open.map(tRow).join('')}` : ''}
+        ${closed.length ? `<div class="sec-title calm">已結束</div>${closed.map(tRow).join('')}` : ''}
       </div>`;
   },
 
