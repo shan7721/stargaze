@@ -494,8 +494,8 @@ img { max-width: 100%; }
 <div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="card" id="mbox"></div></div>
 
 <script>
-// Google Apps Script (GAS) Web App 雲端回寫端點與雲端硬碟圖片上傳端點 (部署GAS後貼於此處即可全自動同步與上傳圖片)
-const GAS_API_URL = 'https://script.google.com/macros/s/AKfycby0FvTYny-xWjFVoVmuzE18tOA9yui-DWpUnR77CKrWFg99yyRGhpe0oF9YqI-6FIvZ/exec';
+// Google Apps Script (GAS) Web App 雲端回寫端點與雲端硬碟圖片上傳端點
+const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbziC_lcRugAcxivYe-JIiJk0SS6GhpYSG8OnC5sZ4NNHeMHttVNFoZP0IUXWzDNTP31/exec';
 
 function resolveDriveImg(pathOrUrl, sz = 800) {
   if (!pathOrUrl) return '';
@@ -622,8 +622,8 @@ const F = {
   ]}
 };
 
-let n = 2000;
-const id = () => 'x' + (n++);
+// 使用時間戳記與亂數產生唯一 ID，避免跨裝置或重開網頁時 ID 撞號
+const id = () => 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 let D = {
   cfg: { conc: 70000, merch: 10000, month: 4500, target: 2420 },
@@ -721,7 +721,7 @@ let D = {
     { id: "pr_47", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP(哥哥的)", cat: "官方周邊", src: "官方WVS", date: "2025-04-18", pay: "付全額", init: 576.0, supp: 0.0, deliv: "已到貨", link: "", notes: "max31309" },
     { id: "pr_48", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 朴成淏普通版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 245.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
     { id: "pr_49", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 金雲鶴普通版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 265.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
-    { id: "pr_50", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 金雲鶴單封版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 214.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
+    { id: "pr_50", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 金雲鶴單封版特典卡", cat: "tasks", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 214.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
     { id: "pr_51", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR I FEEL GOOD SHOWCASE 朴成淏單封版特典卡", cat: "官方周邊", src: "個人賣家收購", date: "2025-05-17", pay: "付全額", init: 174.0, supp: 0.0, deliv: "已到貨", link: "https://docs.google.com/spreadsheets/d/12rhhjCNiAXXGCoKYCIruNP_zny6-ol6YsNIBBaIdRTk/edit?gid=567222994#gid=567222994", notes: "응응韓娛代購社群 (20+運費38)附團卡" },
     { id: "pr_52", artist: "BOYNEXTDOOR- NO GENRE（4ND EP） WeVerse Albums Ver", name: "BOYNEXTDOOR- NO GENRE（4ND EP） WeVerse Albums Ver", cat: "專輯", src: "實體門市", date: "2025-05-31", pay: "現金", init: 283.0, supp: 0.0, deliv: "已到貨", link: "", notes: "WOWPASS IN WITHMUU 弘大店" },
     { id: "pr_53", artist: "BOYNEXTDOOR", name: "BOYNEXTDOOR ONEDOOR MEMBERSHIP續訂會員", cat: "官方周邊", src: "官方WVS", date: "2025-06-26", pay: "付全額", init: 530.0, supp: 0.0, deliv: "已到貨", link: "", notes: "" },
@@ -822,7 +822,7 @@ let D = {
 
 try {
   const s = JSON.parse(localStorage.getItem('fanhome_v3') || 'null');
-  if (s && s.cfg && s.ev && s.ev.length >= 35) {
+  if (s && s.cfg && Array.isArray(s.ev)) {
     D = s;
     if (!D.yearly) D.yearly = {};
   }
@@ -834,10 +834,14 @@ const save = () => {
     if (GAS_API_URL) {
       fetch(GAS_API_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(D)
-      }).catch(err => console.log('雲端回寫中...'));
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (!res || !res.ok) console.warn('雲端備份失敗：', res);
+      })
+      .catch(err => console.error('雲端回寫錯誤：', err));
     }
   } catch (e) {}
 };
@@ -1692,7 +1696,25 @@ function go(r) {
   $('#main').innerHTML = V[r]();
 }
 
+// 啟動時自動向 Google Apps Script 讀取雲端最新備份
+async function loadFromCloud() {
+  if (!GAS_API_URL) return;
+  try {
+    const res = await fetch(GAS_API_URL + '?t=' + Date.now());
+    const j = await res.json();
+    if (j && j.ok && j.data && j.data.cfg) {
+      D = j.data;
+      if (!D.yearly) D.yearly = {};
+      localStorage.setItem('fanhome_v3', JSON.stringify(D));
+      go(room);
+    }
+  } catch (e) {
+    console.warn('雲端讀取失敗，暫時使用本機快取：', e);
+  }
+}
+
 go('home');
+loadFromCloud();
 </script>
 </body>
 </html>
