@@ -864,15 +864,20 @@ const tourSum = p => p.annual_override ? p.annual_override : sum(D.te.filter(e =
 const isOverseasEvent = e => Boolean(e.tour_id || (/INSPIRE|KSPO|SEOUL|SINGAPORE|INCHEON/i.test(`${e.venue} ${e.name}`) && !/威秀|TAIPEI|KAOHSIUNG|TAOYUAN/i.test(`${e.venue} ${e.name}`)));
 
 function getActiveConfig() {
-  const dt = getActiveDate();
-  const yr = dt.slice(0, 4);
-  const mo = +dt.slice(5, 7);
-  const nextYr = String(+yr + 1);
-  // 若為 11-12月，且 D.yearly[nextYr] 存在，使用者在非跨年測試或預填檢視時可切換
-  if (mo >= 11 && D.yearly && D.yearly[nextYr] && simDateOverride.startsWith(nextYr)) {
-    return D.yearly[nextYr];
+  const yr = getActiveDate().slice(0, 4);
+  if (D.yearly && D.yearly[yr] && D.yearly[yr].conc != null) {
+    return D.yearly[yr];
   }
   return D.cfg;
+}
+
+function getActiveFort() {
+  const yr = getActiveDate().slice(0, 4);
+  if (D.yearly && D.yearly[yr] && D.yearly[yr].fort) {
+    return D.yearly[yr].fort;
+  }
+  if (yr === TODAY.slice(0, 4)) return D.fort;
+  return { no: "", text: "", sum: "", locked: false };
 }
 
 function calc() {
@@ -1033,19 +1038,21 @@ const rowH = (k, x, ic, t, s, r, extraHtml='', alert=false) => `
 const addB = (k, x) => `<button class="btn" onclick="openM('${k}',null,${x ? `{pid:'${x}'}` : '{}'})">＋ 新增</button>`;
 
 const V = {
-  home() {
+home() {
     const dt = getActiveDate();
     const yr = dt.slice(0, 4);
-    const mo = +dt.slice(5, 7);
-    const nextYr = String(+yr + 1);
+    const realYr = TODAY.slice(0, 4);
+    const realMo = +TODAY.slice(5, 7);
+    const nextYr = String(+realYr + 1);
     const cf = getActiveConfig();
     const c = calc();
-    const f = D.fort;
-    const isNovDec = mo >= 11;
-    const hasNextYr = D.yearly && D.yearly[nextYr];
+    const f = getActiveFort();
+    // 只要實際日期在 11~12 月，或正處於跨年預填模式，皆開放填寫
+    const isNovDec = realMo >= 11 || Boolean(simDateOverride);
+    const hasNextYr = Boolean(D.yearly && D.yearly[nextYr] && (D.yearly[nextYr].conc != null || (D.yearly[nextYr].fort && D.yearly[nextYr].fort.no)));
 
     return `
-      ${simDateOverride ? `<div style="margin-bottom:12px"><button class="pill" onclick="simDateOverride='';go('home')">← 回到 ${TODAY.slice(0,4)} 年度</button></div>` : ''}
+      ${simDateOverride ? `<div style="margin-bottom:12px"><button class="pill" onclick="simDateOverride='';go('home')">← 回到 ${realYr} 年度</button></div>` : ''}
       <!-- 月老籤詩獨立區塊 -->
       <div class="card" style="background:var(--accent-pink)">
         <span class="tape" style="background:var(--tape-color-alt)"></span>
@@ -1053,29 +1060,29 @@ const V = {
         ${f.locked ? `
           <p style="margin:6px 0;font-size:16px"><b>${f.no}</b>・${f.text}</p>
           <p style="margin:6px 0;font-size:15px;color:var(--accent-pink-text)"><b>運勢：</b>${f.sum}</p>
-          <div style="text-align:right;margin-top:6px"><a href="#" style="font-size:12px;color:var(--soft);text-decoration:none" onclick="D.fort.locked=false;save();go('home');return false">（解鎖設定）</a></div>
+          <div style="text-align:right;margin-top:6px"><a href="#" style="font-size:12px;color:var(--soft);text-decoration:none" onclick="if(!D.yearly)D.yearly={};if(!D.yearly['${yr}'])D.yearly['${yr}']={...getActiveConfig()};D.yearly['${yr}'].fort={...getActiveFort(),locked:false};if('${yr}'===TODAY.slice(0,4))D.fort.locked=false;save();go('home');return false">（解鎖設定）</a></div>
         ` : isNovDec ? `
           <label>🏮 快速選擇霞海城隍廟月老籤號（自動填寫籤詩與運勢）</label>
           <select id="fno_sel" onchange="onPoemSelect(this.value)">
             <option value="">-- 請選擇籤號 --</option>
             ${Object.keys(POEMS).map(k => `<option value="${k}" ${k===f.no?'selected':''}>${k}</option>`).join('')}
           </select>
-          <label>籤號</label><input id="fno" value="${f.no}">
-          <label>籤詩全文</label><textarea id="ftx" rows="3">${f.text}</textarea>
-          <label>運勢一句話解析</label><textarea id="fsum" rows="2">${f.sum}</textarea>
+          <label>籤號</label><input id="fno" value="${f.no || ''}">
+          <label>籤詩全文</label><textarea id="ftx" rows="3">${f.text || ''}</textarea>
+          <label>運勢一句話解析</label><textarea id="fsum" rows="2">${f.sum || ''}</textarea>
           <label>${yr} 追星總預算</label><input id="b1" type="number" value="${cf.conc}">
           <label>${yr} 周邊總預算</label><input id="b2" type="number" value="${cf.merch}">
           <label>${yr} 每月娛樂費</label><input id="b3" type="number" value="${cf.month}">
           <div class="acts">
-            <button class="btn" onclick="const nc={conc:+$('#b1').value,merch:+$('#b2').value,month:+$('#b3').value,target:2420};if(simDateOverride.startsWith('${nextYr}')) { if(!D.yearly)D.yearly={}; D.yearly['${nextYr}']=nc; } else { D.cfg=nc; } D.fort={no:$('#fno').value,text:$('#ftx').value,sum:$('#fsum').value,locked:true};save();go('home')">確認送出並鎖定</button>
+            <button class="btn" onclick="const nf={no:$('#fno').value,text:$('#ftx').value,sum:$('#fsum').value,locked:true};const nc={conc:+$('#b1').value,merch:+$('#b2').value,month:+$('#b3').value,target:2420,fort:nf};if(!D.yearly)D.yearly={};D.yearly['${yr}']=nc;if('${yr}'===TODAY.slice(0,4)){D.cfg={conc:nc.conc,merch:nc.merch,month:nc.month,target:2420};D.fort=nf;}save();go('home')">確認送出並鎖定</button>
           </div>
         ` : '<div style="color:var(--soft)">目前非開放填寫時段。</div>'}
 
-        ${isNovDec && !simDateOverride.startsWith(nextYr) ? `
+        ${realMo >= 11 && !simDateOverride.startsWith(nextYr) ? `
           <div class="next-yr-box">
             <div style="font-weight:700;color:var(--accent-pink-text);margin-bottom:4px">🌱 跨年預先填寫區（${nextYr} 年度）</div>
             <div style="font-size:13px;color:var(--soft);margin-bottom:8px">${hasNextYr ? `✓ 已預存 ${nextYr} 年度預算與籤詩（將於 ${nextYr}/01/01 自動生效）` : `您可以在 11～12 月提前規劃與預填 ${nextYr} 年度的預算與目標。`}</div>
-            <button class="btn" style="padding:6px 14px;font-size:13px" onclick="simDateOverride='${nextYr}-01-01';go('home')">＋ 預先填寫 ${nextYr} 年度資料</button>
+            <button class="btn" style="padding:6px 14px;font-size:13px" onclick="simDateOverride='${nextYr}-01-01';go('home')">${hasNextYr ? `✏️ 檢視／修改 ${nextYr} 年度資料` : `＋ 預先填寫 ${nextYr} 年度資料`}</button>
           </div>
         ` : ''}
       </div>
